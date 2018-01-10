@@ -2,14 +2,14 @@ from setuptools import setup
 
 
 setup(
-    name='eventstore',
+    name='kant',
     version='0.1.0',
-    description='The CQRS and Event Sourcing components for Python',
-    url='http://github.com/patrickporto/eventstore',
+    description='The CQRS and Event Sourcing framework for Python',
+    url='http://github.com/patrickporto/kant',
     author='Patrick Porto',
     author_email='patrick.s.porto@gmail.com',
     license='MIT',
-    packages=['eventstore'],
+    packages=['kant'],
     setup_requires=[
         'pytest-runner',
     ],
@@ -31,5 +31,5 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-    keywords='eventsourcing cqrs',
+    keywords='eventsourcing cqrs eventstore',
 )

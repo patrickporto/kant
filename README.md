@@ -1,14 +1,14 @@
-# Event Store
-[![Build Status](https://travis-ci.org/patrickporto/eventstore.svg?branch=master)](https://travis-ci.org/patrickporto/eventstore)
-[![codecov.io](https://codecov.io/github/patrickporto/eventstore/coverage.svg?branch=master)](https://codecov.io/github/patrickporto/eventstore?branch=master)[![Waffle.io - Columns and their card count](https://badge.waffle.io/patrickporto/eventstore.svg?columns=all)](https://waffle.io/patrickporto/eventstore)
+# Kant Framework
+[![Build Status](https://travis-ci.org/patrickporto/kant.svg?branch=master)](https://travis-ci.org/patrickporto/kant)
+[![codecov.io](https://codecov.io/github/patrickporto/kant/coverage.svg?branch=master)](https://codecov.io/github/patrickporto/kant?branch=master)[![Waffle.io - Columns and their card count](https://badge.waffle.io/patrickporto/kant.svg?columns=all)](https://waffle.io/patrickporto/kant)
 
 
-A CQRS and Event Sourcing for Python 3.
+A CQRS and Event Sourcing framework for Python 3.
 
 ## Installing
 
 ```bash
-pip install eventstore
+pip install kant
 ```
 
 ## Getting started

@@ -1,4 +1,4 @@
-from eventstore import sum
+from kant import sum
 
 
 def test_sum():
