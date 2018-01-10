@@ -48,3 +48,23 @@ class DatabaseSchemaWrapper(object):
 
     def escape_string(self, text):
         return text
+
+
+class Query():
+    sql_select = 'SELECT {columns} FROM {table}'
+
+    def __init__(self, table):
+        self.table = table
+
+    def select(self):
+        return self
+
+    def __str__(self):
+        stmt_query = self.sql_select.format(
+            table=self.table,
+            columns='*',
+        )
+        return stmt_query
+
+    def __eq__(self, other):
+        return str(self) == str(other)
