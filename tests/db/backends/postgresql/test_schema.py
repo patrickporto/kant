@@ -1,5 +1,5 @@
 from kant.db.backends import Field
-from kant.db.backends.postgresql import DatabaseWrapper
+from kant.db.backends.postgresql import DatabaseSchemaWrapper
 
 
 def test_create_table_should_return_sql_create_table():
@@ -25,9 +25,12 @@ def test_create_table_should_return_sql_create_table():
             null=False,
         ),
     ]
-    database_wrapper = DatabaseWrapper()
+    database_schema_wrapper = DatabaseSchemaWrapper()
     # act
-    sql = database_wrapper.create_table(name=table_name, columns=columns)
+    sql = database_schema_wrapper.create_table(
+        name=table_name,
+        columns=columns,
+    )
     # assert
     expected_sql = (
         'CREATE TABLE event_store '
@@ -40,9 +43,9 @@ def test_create_table_should_return_sql_create_table():
 def test_drop_table_should_return_sql_drop_table():
     # arrange
     table_name = 'event_store'
-    database_wrapper = DatabaseWrapper()
+    database_schema_wrapper = DatabaseSchemaWrapper()
     # act
-    sql = database_wrapper.drop_table(name=table_name)
+    sql = database_schema_wrapper.drop_table(name=table_name)
     # assert
     assert sql == 'DROP TABLE event_store'
 
@@ -52,9 +55,9 @@ def test_create_index_should_return_sql_create_index():
     name = 'event_store_id'
     table = 'event_store'
     column = 'id'
-    database_wrapper = DatabaseWrapper()
+    database_schema_wrapper = DatabaseSchemaWrapper()
     # act
-    sql = database_wrapper.create_index(
+    sql = database_schema_wrapper.create_index(
         name=name,
         table=table,
         columns=[column],
@@ -66,9 +69,9 @@ def test_create_index_should_return_sql_create_index():
 def test_drop_index_should_return_sql_drop_index():
     # arrange
     name = 'event_store_id'
-    database_wrapper = DatabaseWrapper()
+    database_schema_wrapper = DatabaseSchemaWrapper()
     # act
-    sql = database_wrapper.drop_index(
+    sql = database_schema_wrapper.drop_index(
         name=name,
     )
     # assert

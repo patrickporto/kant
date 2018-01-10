@@ -1,4 +1,4 @@
-class DatabaseWrapper(object):
+class DatabaseSchemaWrapper(object):
     sql_create_table = 'CREATE TABLE {name} ({columns})'
     sql_drop_table = 'DROP TABLE {name}'
     sql_create_index = 'CREATE INDEX {name} ON {table} ({columns})'
