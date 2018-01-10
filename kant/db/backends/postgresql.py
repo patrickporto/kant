@@ -55,10 +55,7 @@ class Query():
 
     def __init__(self, table):
         self.table = table
-
-    def select(self, columns=[]):
-        self.columns = columns
-        return self
+        self.criterion = []
 
     def __str__(self):
         stmt_columns = ','.join(self.columns) if self.columns else '*'
@@ -66,6 +63,10 @@ class Query():
             table=self.table,
             columns=stmt_columns,
         )
+        if self.criterion:
+            stmt_query += ' WHERE {criterion}'.format(
+                criterion=','.join(self.criterion),
+            )
         return stmt_query
 
     def __repr__(self):
@@ -73,3 +74,24 @@ class Query():
 
     def __eq__(self, other):
         return str(self) == str(other)
+
+    def select(self, columns=[]):
+        self.columns = columns
+        return self
+
+    def where(self, **kwargs):
+        for name, value in kwargs.items():
+            column, *rest = name.split('__')
+            operation = rest[0] if len(rest) > 0 else '='
+            if isinstance(value, str):
+                formatted_value = '"{}"'.format(value)
+            elif isinstance(value, bool):
+                formatted_value = str(value).lower()
+            else:
+                formatted_value = value
+            self.criterion.append('{column} {operation} {value}'.format(
+                column=column,
+                operation=operation,
+                value=formatted_value,
+            ))
+        return self
