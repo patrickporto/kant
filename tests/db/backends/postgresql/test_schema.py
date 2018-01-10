@@ -4,7 +4,7 @@ from kant.db.backends.postgresql import DatabaseSchemaWrapper
 
 def test_create_table_should_return_sql_create_table():
     # arrange
-    table_name = 'event_store'
+    name = 'event_store'
     columns = [
         Field(
             name='id',
@@ -28,7 +28,7 @@ def test_create_table_should_return_sql_create_table():
     database_schema_wrapper = DatabaseSchemaWrapper()
     # act
     sql = database_schema_wrapper.create_table(
-        name=table_name,
+        name=name,
         columns=columns,
     )
     # assert
@@ -42,10 +42,10 @@ def test_create_table_should_return_sql_create_table():
 
 def test_drop_table_should_return_sql_drop_table():
     # arrange
-    table_name = 'event_store'
+    name = 'event_store'
     database_schema_wrapper = DatabaseSchemaWrapper()
     # act
-    sql = database_schema_wrapper.drop_table(name=table_name)
+    sql = database_schema_wrapper.drop_table(name=name)
     # assert
     assert sql == 'DROP TABLE event_store'
 
