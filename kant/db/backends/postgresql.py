@@ -1,12 +1,31 @@
 class DatabaseWrapper(object):
-    sql_create_table = 'CREATE TABLE {name}'
+    sql_create_table = 'CREATE TABLE {name} ({columns})'
     sql_drop_table = 'DROP TABLE {name}'
     sql_create_index = 'CREATE INDEX {name} ON {table} ({columns})'
     sql_drop_index = 'DROP INDEX {name}'
 
-    def create_table(self, name):
+    def create_table(self, name, columns):
         name = self.escape_string(name)
-        return self.sql_create_table.format(name=name)
+        stmt_columns = []
+        stmt_primary_keys = []
+        for column in columns:
+            stmt_column = '{name} {type}'.format(
+                name=column.name,
+                type=column.type,
+            )
+            if column.primary_key:
+                stmt_primary_key = 'PRIMARY KEY ({name})'.format(
+                    name=column.name,
+                )
+                stmt_primary_keys.append(stmt_primary_key)
+            elif not column.null:
+                stmt_column += ' NOT NULL'
+            stmt_columns.append(stmt_column)
+        stmt = self.sql_create_table.format(
+            name=name,
+            columns=','.join(stmt_columns + stmt_primary_keys)
+        )
+        return stmt
 
     def drop_table(self, name):
         name = self.escape_string(name)
