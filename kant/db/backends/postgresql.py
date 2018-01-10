@@ -2,6 +2,7 @@ class DatabaseWrapper(object):
     sql_create_table = 'CREATE TABLE {name}'
     sql_drop_table = 'DROP TABLE {name}'
     sql_create_index = 'CREATE INDEX {name} ON {table} ({columns})'
+    sql_drop_index = 'DROP INDEX {name}'
 
     def create_table(self, name):
         name = self.escape_string(name)
@@ -21,6 +22,10 @@ class DatabaseWrapper(object):
             columns=','.join(columns)
         )
         return stmt
+
+    def drop_index(self, name):
+        name = self.escape_string(name)
+        return self.sql_drop_index.format(name=name)
 
     def escape_string(self, text):
         return text

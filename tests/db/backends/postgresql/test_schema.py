@@ -35,3 +35,15 @@ def test_create_index_should_return_sql_create_index():
     )
     # assert
     assert sql == 'CREATE INDEX event_store_id ON event_store (id)'
+
+
+def test_drop_index_should_return_sql_drop_index():
+    # arrange
+    name = 'event_store_id'
+    database_wrapper = DatabaseWrapper()
+    # act
+    sql = database_wrapper.drop_index(
+        name=name,
+    )
+    # assert
+    assert sql == 'DROP INDEX event_store_id'
