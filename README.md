@@ -1,6 +1,6 @@
 # Event Store
 [![Build Status](https://travis-ci.org/patrickporto/eventstore.svg?branch=master)](https://travis-ci.org/patrickporto/eventstore)
-[![codecov.io](https://codecov.io/github/patrickporto/badges/coverage.svg?branch=master)](https://codecov.io/github/boennemann/badges?branch=master)[![Waffle.io - Columns and their card count](https://badge.waffle.io/patrickporto/eventstore.svg?columns=all)](https://waffle.io/patrickporto/eventstore)
+[![codecov.io](https://codecov.io/github/patrickporto/eventstore/coverage.svg?branch=master)](https://codecov.io/github/patrickporto/eventstore?branch=master)[![Waffle.io - Columns and their card count](https://badge.waffle.io/patrickporto/eventstore.svg?columns=all)](https://waffle.io/patrickporto/eventstore)
 
 
 A CQRS and Event Sourcing for Python 3.
