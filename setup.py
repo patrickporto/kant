@@ -31,4 +31,5 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
+    keywords='eventsourcing cqrs',
 )
