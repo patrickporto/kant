@@ -56,15 +56,20 @@ class Query():
     def __init__(self, table):
         self.table = table
 
-    def select(self):
+    def select(self, columns=[]):
+        self.columns = columns
         return self
 
     def __str__(self):
+        stmt_columns = ','.join(self.columns) if self.columns else '*'
         stmt_query = self.sql_select.format(
             table=self.table,
-            columns='*',
+            columns=stmt_columns,
         )
         return stmt_query
+
+    def __repr__(self):
+        return str(self)
 
     def __eq__(self, other):
         return str(self) == str(other)
