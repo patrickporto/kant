@@ -1,17 +1,17 @@
 from os import environ
 from datetime import datetime
 import json
-import psycopg2
+import aiopg
 import pytest
 from fixtures import AccountSchemaModel, FoundAdded
 
 
 @pytest.fixture
-def dbsession():
-    conn = psycopg2.connect(
+async def dbsession():
+    conn = await aiopg.connect(
         user=environ.get('DATABASE_USER'),
         password=environ.get('DATABASE_PASSWORD'),
-        dbname=environ.get('DATABASE_DATABASE'),
+        database=environ.get('DATABASE_DATABASE'),
         host=environ.get('DATABASE_HOST', 'localhost'),
         port=environ.get('DATABASE_PORT', 5432),
     )

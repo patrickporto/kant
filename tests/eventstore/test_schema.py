@@ -1,35 +1,38 @@
+import pytest
 from kant.eventstore.schema import create_table, drop_table
 
 
-def test_create_table_should_create_table_if_not_exists(dbsession):
+@pytest.mark.asyncio
+async def test_create_table_should_create_table_if_not_exists(dbsession):
     # act
-    create_table(dbsession)
+    await create_table(dbsession)
     # assert
-    with dbsession.cursor() as cursor:
-        cursor.execute("""
+    async with dbsession.cursor() as cursor:
+        await cursor.execute("""
         SELECT EXISTS (
             SELECT 1
             FROM information_schema.tables
             WHERE table_name = 'event_store'
         );
         """)
-        (exists,) = cursor.fetchone()
+        (exists,) = await cursor.fetchone()
         assert exists
 
 
-def test_drop_table_should_drop_table_if_exists(dbsession):
+@pytest.mark.asyncio
+async def test_drop_table_should_drop_table_if_exists(dbsession):
     # arrange
-    create_table(dbsession)
+    await create_table(dbsession)
     # act
-    drop_table(dbsession)
+    await drop_table(dbsession)
     # assert
-    with dbsession.cursor() as cursor:
-        cursor.execute("""
+    async with dbsession.cursor() as cursor:
+        await cursor.execute("""
         SELECT EXISTS (
             SELECT 1
             FROM information_schema.tables
             WHERE table_name = 'event_store'
         );
         """)
-        (exists,) = cursor.fetchone()
+        (exists,) = await cursor.fetchone()
         assert not exists

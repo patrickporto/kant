@@ -12,15 +12,15 @@ class StreamManager(MutableMapping):
     def __init__(self, session):
         self._session = session
 
-    def __getitem__(self, key):
-        with self._session.cursor() as cursor:
+    async def __getitem__(self, key):
+        async with self._session.cursor() as cursor:
             stmt = """
             SELECT * FROM event_store WHERE id = %(id)s;
             """
-            cursor.execute(stmt, {
+            await cursor.execute(stmt, {
                 'id': key,
             })
-            return EventStream(cursor.fetchone())
+            return EventStream(await cursor.fetchone())
 
     def __delitem__(self, key):
         with self._session.cursor() as cursor:

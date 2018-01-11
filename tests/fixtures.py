@@ -1,28 +1,21 @@
 from kant.events import models
 
 
-class BankAccountCreated(object):
-    def __init__(self, *, id, owner):
-        self.id = id
-        self.owner = owner
+class BankAccountCreated(models.EventModel):
+    id = models.UUIDField(primary_key=True)
+    owner = models.CharField()
 
 
-class DepositPerformed(object):
-    def __init__(self, *, account_id, amount):
-        self.account_id = account_id
-        self.amount = amount
+class DepositPerformed(models.EventModel):
+    amount = models.DecimalField()
 
 
-class OwnerChanged(object):
-    def __init__(self, *, account_id, new_owner):
-        self.account_id = account_id
-        self.new_owner = new_owner
+class OwnerChanged(models.EventModel):
+    new_owner = models.CharField()
 
 
-class WithdrawalPerformed(object):
-    def __init__(self, *, account_id, amount):
-        self.account_id = account_id
-        self.amount = amount
+class WithdrawalPerformed(models.EventModel):
+    amount = models.DecimalField()
 
 
 class FoundAdded(models.EventModel):

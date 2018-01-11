@@ -2,7 +2,6 @@ from operator import attrgetter
 from datetime import datetime
 import json
 
-from sqlalchemy_utils import UUIDType
 from sqlalchemy.dialects.postgresql import JSONB
 import sqlalchemy as sa
 from .exceptions import ConsistencyError, ObjectDoesNotExist
@@ -11,10 +10,10 @@ from kant.events.models import EventModel
 
 
 class EventStoreRepository:
-    def __init__(self, session, event_store_name):
+    def __init__(self, session, *args, **kwargs):
         self.session = session
-        self.EventStore = sa.Table(event_store_name, sa.MetaData(),  # NOQA
-            sa.Column('id', UUIDType(binary=False), primary_key=True),
+        self.EventStore = sa.Table('event_store', sa.MetaData(),  # NOQA
+            sa.Column('id', sa.String),
             sa.Column('version', sa.Integer),
             sa.Column('data', JSONB),
             sa.Column('metadata', JSONB),
@@ -53,14 +52,13 @@ class EventStoreRepository:
         return new_version
 
     async def get(self, *, entity_id, initial_version=0):
-        results = await self.session.execute(
-            self.EventStore.select().where(
-                sa.and_(
-                    self.EventStore.c.id == entity_id,
-                    self.EventStore.c.data.op('?')('version').cast(sa.Integer) >= initial_version,
-                )
-            )
-        )
+        stmt = """
+        SELECT * FROM event_store WHERE id = %(id)s AND data ? version >= %(version)s;
+        """
+        results = await self.session.execute(stmt, {
+            'id': entity_id,
+            'version': initial_version,
+        })
         event_store = await results.fetchone()
         if not event_store:
             raise ObjectDoesNotExist()

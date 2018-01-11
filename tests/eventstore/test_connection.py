@@ -1,11 +1,13 @@
 from collections.abc import MutableMapping
+import pytest
 from kant.eventstore import EventStoreConnection, EventStream
 from kant.eventstore.schema import create_table
 
 
-def test_event_store_connection_should_have_streams(dbsession):
+@pytest.mark.asyncio
+async def test_event_store_connection_should_have_streams(dbsession):
     # arrange
-    create_table(dbsession)
+    await create_table(dbsession)
     # act
     connection = EventStoreConnection(dbsession)
     # assert
@@ -13,11 +15,12 @@ def test_event_store_connection_should_have_streams(dbsession):
     assert isinstance(connection.streams, MutableMapping)
 
 
-def test_streams_should_get_stream(dbsession):
+@pytest.mark.asyncio
+async def test_streams_should_get_stream(dbsession):
     # arrange
-    create_table(dbsession)
+    await create_table(dbsession)
     # act
     connection = EventStoreConnection(dbsession)
-    stream = connection.streams.get('test-stream')
+    stream = await connection.streams.get('test-stream')
     # assert
     assert isinstance(stream, EventStream)

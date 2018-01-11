@@ -1,7 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Table, Column, Integer, DateTime
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy_utils import UUIDType
 from inflection import underscore
 
 

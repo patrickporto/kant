@@ -2,7 +2,7 @@ from json import JSONDecoder, JSONEncoder
 from datetime import datetime
 from decimal import Decimal
 from abc import ABCMeta
-from uuid import uuid1, UUID
+from uuid import uuid1
 from pprint import pformat
 from collections import MutableMapping
 import json
@@ -37,9 +37,7 @@ class UUIDField(Field):
         return str(value)
 
     def parse(self, value):
-        if isinstance(value, UUID):
-            return value
-        return UUID(value)
+        return value
 
 
 class DecimalField(Field):

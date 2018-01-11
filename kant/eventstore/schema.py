@@ -1,19 +1,19 @@
-def create_table(dbsession):
-    with dbsession.cursor() as cursor:
+async def create_table(dbsession):
+    async with dbsession.cursor() as cursor:
         stmt = """
-        CREATE TABLE event_store (
+        CREATE TABLE IF NOT EXISTS event_store (
             id varchar(255),
             data json NOT NULL,
             created_at timestamp NOT NULL,
             updated_at timestamp NOT NULL
         )
         """
-        cursor.execute(stmt)
+        await cursor.execute(stmt)
 
 
-def drop_table(dbsession):
-    with dbsession.cursor() as cursor:
+async def drop_table(dbsession):
+    async with dbsession.cursor() as cursor:
         stmt = """
         DROP TABLE event_store
         """
-        cursor.execute(stmt)
+        await cursor.execute(stmt)

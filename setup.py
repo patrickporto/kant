@@ -14,15 +14,16 @@ setup(
         'sqlalchemy_utils',
         'python-dateutil',
         'inflection',
+        'aiopg',
     ],
     setup_requires=[
-        'psycopg2',
         'pytest-runner',
     ],
     tests_require=[
         'pytest',
         'pytest-pycodestyle',
         'pytest-cov',
+        'pytest-asyncio',
     ],
     zip_safe=False,
     classifiers=[
