@@ -4,7 +4,7 @@ import pytest
 
 
 @pytest.fixture
-async def dbsession():
+def dbsession():
     conn = psycopg2.connect(
         user=environ.get('DATABASE_USER'),
         password=environ.get('DATABASE_PASSWORD'),
