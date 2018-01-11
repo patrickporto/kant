@@ -205,9 +205,19 @@ class EventFieldMapping(MutableMapping):
             try:
                 self._values[key] = self.concrete_fields[key].parse(value)
             except TypeError as e:
-                raise TypeError(f"The value '{repr(value)}' is invalid. The field '{key}' {str(e)}")
+                msg = ("The value '{value}' is invalid. "
+                       "The field '{key}' {exception}").format(
+                    value=repr(value),
+                    field=key,
+                    exception=str(e),
+                )
+                raise TypeError(msg)
         else:
-            raise KeyError(f'{self.__class__.__name__} does not support field: {key}')
+            msg = '{class_name} does not support field: {field}'.format(
+                class_name=self.__class__.__name__,
+                field=key,
+            )
+            raise KeyError(msg)
 
     def __delitem__(self, key):
         del self._values[key]
