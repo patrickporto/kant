@@ -16,6 +16,7 @@ setup(
     tests_require=[
         'pytest',
         'pytest-pycodestyle',
+        'pytest-asyncio',
         'pytest-cov',
     ],
     zip_safe=False,
