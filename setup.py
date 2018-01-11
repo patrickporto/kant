@@ -10,6 +10,11 @@ setup(
     author_email='patrick.s.porto@gmail.com',
     license='MIT',
     packages=['kant'],
+    install_requires=[
+        'sqlalchemy_utils',
+        'python-dateutil',
+        'inflection',
+    ],
     setup_requires=[
         'pytest-runner',
     ],
