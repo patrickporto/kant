@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=mydatabase
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - db
+    links:
+      - db
+    environment:
+      - PYTHONUNBUFFERED=0
+      - DATABASE_USER=test
+      - DATABASE_PASSWORD=test
+      - DATABASE_DATABASE=mydatabase
+      - DATABASE_HOST=db
