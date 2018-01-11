@@ -1,16 +1,21 @@
 language: python
 python:
-  - "3.5"
-  - "3.5-dev"  # 3.5 development branch
-  - "3.6"
-  - "3.6-dev"  # 3.6 development branch
-  - "pypy3"
-
+- '3.5'
+- '3.5-dev'
+- '3.6'
+- '3.6-dev'
+- 'pypy3'
 install:
 - pip install codecov
-
 script:
-  - python setup.py test # or py.test for Python versions 3.5 and below
-
+- python setup.py test
 after_success:
 - codecov
+deploy:
+  provider: pypi
+  user: "patrickporto"
+  password:
+    secure: RLz8ezfOTkT+ryTFY8IC2NyQLmfU7rQIq5cE4h7QLl+Kf2Wk2knNRdnSpN/HVXww2wfMw/JJxLN2ncI1rv1ZVsBx0r90580H3iNPoCJIVvUBK1OCLSRpNnYLhtCa7n1PTXwY7YWJXQ22CjpXgjVKOWCRfOtTIxpedLhIcNqeFm2GOhsea06PDlP1LWyr+at+n8vlXjH/49nH5ENRIRQ1F1xqWkmbFUPvJqbEvcC5ehU3Tlh5eNfIztO2VUDP3xJ3ZzqhqPEO3LfXtzOtR7khA1z1c76uBNyHYhWUSRdQBrbzhu183EhuG302Zrd2oZD0tqHjEir3SeQ5XUgeildRim205WSeTF+ugV+HuPtJk3Wb2c0jT3EaXuFxcZJKMGYNlXtIXjq5GHTmezhCQ8PP0oKwlAQrXT+w1lbvOl+3ANcaxxyy5edtgh2p5KGnn+ndmc1jdx/jjqv/IlDP7HqIjcsH9RXkNcxa6TPfDp8soODXpBujsuo11vAM7Zo277dygbVyYisEPfSMGeYKYlqk5kIZgiCggm+EE9nGRSmQjSTA7sdGeSVSQ4wjLT8kCVb4v4HXY0oZBfQkr7PcS1EbTEIbNAyVnUjUHnukn+bGnfB/7vU8zNPm2QFKnQLBB+8/uS7kKy7i2ACSXB7u1ZrXZnbST4sSzv2ZBgr4e1F5ecQ=
+  on:
+    branch: master
+    tags: true

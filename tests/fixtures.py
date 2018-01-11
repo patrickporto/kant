@@ -1,7 +1,10 @@
+from kant.events import models
+
+
 class BankAccountCreated(object):
     def __init__(self, *, id, owner):
         self.id = id
-        self.onwer = owner
+        self.owner = owner
 
 
 class DepositPerformed(object):
@@ -20,3 +23,11 @@ class WithdrawalPerformed(object):
     def __init__(self, *, account_id, amount):
         self.account_id = account_id
         self.amount = amount
+
+
+class FoundAdded(models.EventModel):
+    amount = models.DecimalField()
+
+
+class AccountSchemaModel(models.SchemaModel):
+    balance = models.DecimalField()
