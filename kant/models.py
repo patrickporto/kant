@@ -35,8 +35,8 @@ class TrackedEntity:
 
     def apply(self, event):
         event_name = underscore(event.event_name())
-        method_name = f'apply_{event_name}'
-        method = getattr(self, f'apply_{event_name}')
+        method_name = 'apply_{0}'.format(event_name)
+        method = getattr(self, method_name)
         method(event)
 
     def dispatch(self, event, flush=True):

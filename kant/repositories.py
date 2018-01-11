@@ -29,7 +29,10 @@ class EventStoreRepository:
 
             if stored_events[-1]['version'] != expected_version:
                 raise ConsistencyError(
-                    message=f"The version is {events[-1]['version']}, but the expected is {expected_version}",
+                    message="The version is {current_version}, but the expected is {expected_version}".format(
+                        current_version=events[-1]['version'],
+                        expected_version=expected_version,
+                    ),
                     ours=events,
                     theirs=stored_events,
                 )

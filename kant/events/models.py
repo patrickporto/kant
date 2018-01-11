@@ -227,7 +227,7 @@ class EventFieldMapping(MutableMapping):
         return self._values.keys()
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} {pformat(dict(self))}>'
+        return '<{0} {1}>'.format(self.__class__.__name__, pformat(dict(self)))
 
     def copy(self):
         return self.__class__(self)
