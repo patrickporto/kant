@@ -11,6 +11,7 @@ setup(
     license='MIT',
     packages=['kant'],
     setup_requires=[
+        'psycopg2',
         'pytest-runner',
     ],
     tests_require=[

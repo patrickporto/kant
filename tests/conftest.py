@@ -1,11 +1,16 @@
-from unittest.mock import Mock
+from os import environ
+import psycopg2
 import pytest
 
 
 @pytest.fixture
-def dbsession():
-    rows = []
-    mock = Mock()
-    cursor = mock.connection.cursor.return_value
-    cursor.execute.return_value = rows
-    return mock
+async def dbsession():
+    conn = psycopg2.connect(
+        user=environ.get('DATABASE_USER'),
+        password=environ.get('DATABASE_PASSWORD'),
+        dbname=environ.get('DATABASE_DATABASE'),
+        host=environ.get('DATABASE_HOST', 'localhost'),
+        port=environ.get('DATABASE_PORT', 5432),
+    )
+    yield conn
+    conn.close()
