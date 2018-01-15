@@ -28,8 +28,8 @@ async def test_event_store_repository_should_save_events(dbsession):
             events=bank_account.get_events(),
             expected_version=bank_account.version,
         )
-    # assert
-    stored_bank_account = await event_store_repository.get(id=bank_account.id)
-    assert stored_bank_account.version == 0
-    assert stored_bank_account.id == bank_account_created.id
-    assert stored_bank_account.owner == bank_account_created.owner
+        # assert
+        stored_bank_account = await event_store_repository.get(entity_id=bank_account.id)
+        assert stored_bank_account.version == 0
+        assert stored_bank_account.id == bank_account_created.id
+        assert stored_bank_account.owner == bank_account_created.owner

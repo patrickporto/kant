@@ -4,6 +4,7 @@ import json
 
 from sqlalchemy.dialects.postgresql import JSONB
 import sqlalchemy as sa
+from psycopg2.extras import Json
 from .exceptions import ConsistencyError, ObjectDoesNotExist
 from kant.events.serializers import EventModelEncoder
 from kant.events.models import EventModel
@@ -40,16 +41,19 @@ class EventStoreRepository:
             stmt = self.EventStore.update().where(
                 self.EventStore.c.id == entity_id,
             )
+            stmt = """
+            UPDATE event_store SET data=%(data)s, updated_at=NOW() WHERE id = %(id)s;
+            """
         except ObjectDoesNotExist:
-            stmt = self.EventStore.insert().values(
-                id=entity_id,
-            )
-        new_version = events[-1]['version']
-        await self.session.execute(stmt.values(
-            version=new_version,
-            data=[json.dumps(event, cls=EventModelEncoder) for event in events],
-        ))
-        return new_version
+            stmt = """
+            INSERT INTO event_store (id, data, created_at, updated_at)
+            VALUES (%(id)s, %(data)s, NOW(), NOW())
+            """
+        self.session.execute(stmt, {
+            'id': entity_id,
+            'data': Json(events)
+        })
+        return events[-1]['version']
 
     async def get(self, *, entity_id, initial_version=0):
         stmt = """
