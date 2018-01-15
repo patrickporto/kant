@@ -14,6 +14,7 @@ setup(
         'sqlalchemy_utils',
         'python-dateutil',
         'inflection',
+	'cuid.py',
     ],
     setup_requires=[
         'pytest-runner',

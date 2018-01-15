@@ -14,7 +14,7 @@ class EventStoreRepository:
     def __init__(self, session, event_store_name):
         self.session = session
         self.EventStore = sa.Table(event_store_name, sa.MetaData(),  # NOQA
-            sa.Column('id', UUIDType(binary=False), primary_key=True),
+            sa.Column('id', sa.String),
             sa.Column('version', sa.Integer),
             sa.Column('data', JSONB),
             sa.Column('metadata', JSONB),
