@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='kant',
-    version='0.2.1',
+    version='0.3.0',
     description='The CQRS and Event Sourcing framework for Python',
     url='http://github.com/patrickporto/kant',
     author='Patrick Porto',
