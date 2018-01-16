@@ -1,6 +1,3 @@
-from datetime import datetime
-from sqlalchemy import Table, Column, Integer, DateTime
-from sqlalchemy.dialects.postgresql import JSONB
 from inflection import underscore
 
 
