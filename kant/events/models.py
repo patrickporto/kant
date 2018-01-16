@@ -189,7 +189,10 @@ class EventFieldMapping(MutableMapping):
 
     def __init__(self, *args, **kwargs):
         self._values = {}
-        initial = {name: value.default_value() for name, value in self.concrete_fields.items() if value.default is not None}
+        initial = {}
+        for name, value in self.concrete_fields.items():
+            if value.default is not None:
+                initial[name] = value.default_value()
         initial.update(dict(*args, **kwargs))
         if args or kwargs:  # avoid creating dict for most common case
             for name, value in initial.items():
