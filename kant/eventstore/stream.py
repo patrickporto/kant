@@ -51,7 +51,8 @@ class StreamManager(MutableMapping):
     def __setitem__(self, key, value):
         with self._session.cursor() as cursor:
             stmt = """
-            UPDATE event_store SET data=%(data)s updated_at=NOW() WHERE id = %(id)s;
+            UPDATE event_store SET data=%(data)s updated_at=NOW()
+            WHERE id = %(id)s;
             INSERT INTO event_store (id, data, created_at, updated_at)
                 SELECT %(id)s, %(data)s, NOW(), NOW()
                 WHERE NOT EXISTS (SELECT 1 FROM table WHERE id = %(id)s);
