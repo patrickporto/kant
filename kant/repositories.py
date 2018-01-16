@@ -47,18 +47,18 @@ class EventStoreRepository:
             VALUES (%(id)s, %(data)s, NOW(), NOW())
             """
         await self.session.execute(stmt, {
-            'id': entity_id,
+            'id': str(entity_id),
             'data': json.dumps(events, cls=EventModelEncoder)
         })
         return events[-1]['version']
 
-    async def get(self, *, entity_id, initial_version=0):
+    async def get(self, entity_id, initial_version=0):
         stmt = """
         SELECT event_store.id, event_store.data, event_store.created_at
         FROM event_store WHERE event_store.id = %(id)s AND CAST(data ? '$version' AS INTEGER) >= %(version)s;
         """
         await self.session.execute(stmt, {
-            'id': entity_id,
+            'id': str(entity_id),
             'version': initial_version,
         })
         event_store = await self.session.fetchone()
