@@ -24,7 +24,7 @@ class EventStoreRepository:
         """ Save the events in the model """
         try:
             stored_events = await self.get(entity_id=entity_id)
-            stored_events = sorted(stored_events, key=attrgetter('version')) # order by version
+            stored_events = sorted(stored_events, key=attrgetter('version'))  # order by version
 
             if stored_events[-1]['version'] != expected_version:
                 raise ConsistencyError(
