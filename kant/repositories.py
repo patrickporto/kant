@@ -20,11 +20,11 @@ class EventStoreRepository:
             sa.Column('created', sa.DateTime, default=datetime.now()),
         )
 
-    async def save(self, entity_id, events, expected_version):
+    async def save(self, entity_id, events, expected_version=0):
         """ Save the events in the model """
         try:
             stored_events = await self.get(entity_id=entity_id)
-            stored_events = sorted(stored_events, key=attrgetter('version'))
+            stored_events = sorted(stored_events, key=attrgetter('version')) # order by version
 
             if stored_events[-1]['version'] != expected_version:
                 raise ConsistencyError(
@@ -33,11 +33,7 @@ class EventStoreRepository:
                     ours=events,
                     theirs=stored_events,
                 )
-            events[:0] = stored_events
-
-            stmt = self.EventStore.update().where(
-                self.EventStore.c.id == entity_id,
-            )
+            events[:0] = stored_events  # add new events
             stmt = """
             UPDATE event_store SET data=%(data)s, updated_at=NOW() WHERE id = %(id)s;
             """
