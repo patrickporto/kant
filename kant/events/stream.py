@@ -34,3 +34,7 @@ class EventStream:
 
     def dumps(self):
         return json.dumps(self._events, cls=EventModelEncoder)
+
+    @classmethod
+    def loads(self, obj):
+        return EventStream([EventModel.loads(event) for event in obj])
