@@ -4,7 +4,6 @@ import json
 
 from sqlalchemy.dialects.postgresql import JSONB
 import sqlalchemy as sa
-from psycopg2.extras import Json
 from .exceptions import ConsistencyError, ObjectDoesNotExist
 from kant.events.serializers import EventModelEncoder
 from kant.events.models import EventModel
@@ -49,16 +48,16 @@ class EventStoreRepository:
             INSERT INTO event_store (id, data, created_at, updated_at)
             VALUES (%(id)s, %(data)s, NOW(), NOW())
             """
-        self.session.execute(stmt, {
+        await self.session.execute(stmt, {
             'id': entity_id,
-            'data': Json(events)
+            'data': json.dumps(events, cls=EventModelEncoder)
         })
         return events[-1]['version']
 
     async def get(self, *, entity_id, initial_version=0):
         stmt = """
         SELECT event_store.id, event_store.data, event_store.created_at
-        FROM event_store WHERE event_store.id = %(id)s AND CAST(data ->> 'version' AS INTEGER) = %(version)s;
+        FROM event_store WHERE event_store.id = %(id)s AND CAST(data ? '$version' AS INTEGER) >= %(version)s;
         """
         await self.session.execute(stmt, {
             'id': entity_id,
@@ -67,7 +66,7 @@ class EventStoreRepository:
         event_store = await self.session.fetchone()
         if not event_store:
             raise ObjectDoesNotExist()
-        return sorted([EventModel.from_dict(json.loads(event)) for event in event_store.data], key=attrgetter('version'))
+        return sorted([EventModel.loads(event) for event in event_store[1]], key=attrgetter('version'))
 
     def event_store(self):
         return self.EventStore

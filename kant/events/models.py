@@ -264,7 +264,7 @@ class EventModel(EventFieldMapping, metaclass=EventModelMeta):
         return self.__class__.__name__
 
     @classmethod
-    def from_dict(self, obj):
+    def loads(self, obj):
         event_name = obj[self.EVENTMODEL_JSON_COLUMN]
         cls = self._sub_cls[event_name]
         del obj[self.EVENTMODEL_JSON_COLUMN]
