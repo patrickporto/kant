@@ -1,3 +1,4 @@
+from copy import deepcopy
 from inflection import underscore
 
 
@@ -23,8 +24,8 @@ class TrackedEntity:
         self._events = []
 
     def fetch_events(self, events):
-        self._stored_events = events
-        self._all_events = events
+        self._stored_events = deepcopy(events)
+        self._all_events = deepcopy(events)
         for event in events:
             self.version += 1
             self.dispatch(event, flush=False)
