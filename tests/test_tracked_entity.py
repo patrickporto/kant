@@ -1,6 +1,7 @@
 import pytest
 from fixtures import BankAccountCreated, DepositPerformed
 from kant.models import TrackedEntity
+from kant.events import EventStream
 
 
 @pytest.mark.asyncio
@@ -70,7 +71,7 @@ async def test_tracked_entity_should_load_events(dbsession):
         def apply_deposit_performed(self, event):
             self.balance += event.get('amount')
 
-    events = [
+    events = EventStream([
         BankAccountCreated(
             id=123,
             owner='John Doe',
@@ -84,7 +85,7 @@ async def test_tracked_entity_should_load_events(dbsession):
             amount=20,
             version=2,
         )
-    ]
+    ])
     # act
     bank_account = BankAccount()
     bank_account.fetch_events(events)
@@ -108,13 +109,13 @@ async def test_tracked_entity_should_apply_event_after_load_events(dbsession):
         def apply_deposit_performed(self, event):
             self.balance += event.get('amount')
 
-    events = [
+    events = EventStream([
         BankAccountCreated(
             id=123,
             owner='John Doe',
             version=0,
         )
-    ]
+    ])
     deposit_performed = DepositPerformed(
         amount=20,
     )
@@ -142,13 +143,13 @@ async def test_tracked_entity_should_return_new_events(dbsession):
         def apply_deposit_performed(self, event):
             self.balance += event.get('amount')
 
-    events = [
+    events = EventStream([
         BankAccountCreated(
             id=123,
             owner='John Doe',
             version=0,
         )
-    ]
+    ])
     deposit_performed = DepositPerformed(
         amount=20,
     )
@@ -211,13 +212,13 @@ async def test_tracked_entity_should_return_stored_events(dbsession):
         def apply_deposit_performed(self, event):
             self.balance += event.get('amount')
 
-    events = [
+    events = EventStream([
         BankAccountCreated(
             id=123,
             owner='John Doe',
             version=0,
         )
-    ]
+    ])
     deposit_performed = DepositPerformed(
         amount=20,
     )

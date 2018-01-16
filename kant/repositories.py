@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 import sqlalchemy as sa
 from .exceptions import ConsistencyError, ObjectDoesNotExist
 from kant.events.serializers import EventModelEncoder
-from kant.events.models import EventModel
+from kant.events import EventModel, EventStream
 
 
 class EventStoreRepository:
@@ -22,36 +22,37 @@ class EventStoreRepository:
 
     async def save(self, entity_id, events, expected_version=0):
         """ Save the events in the model """
+        transaction = await self.session.begin()
+        events = events if isinstance(events, EventStream) else EventStream(events)
         try:
             stored_events = await self.get(entity_id=entity_id)
-            stored_events = sorted(stored_events, key=attrgetter('version'))  # order by version
-
-            if stored_events[-1]['version'] != expected_version:
+            if stored_events.version != expected_version:
                 raise ConsistencyError(
                     current_version=events[-1]['version'],
                     expected_version=expected_version,
                     ours=events,
                     theirs=stored_events,
                 )
-            events[:0] = stored_events  # add new events
+            entity_events = stored_events + events
             stmt = """
             UPDATE event_store SET data=%(data)s, updated_at=NOW() WHERE id = %(id)s;
             """
         except ObjectDoesNotExist:
+            entity_events = events
             stmt = """
             INSERT INTO event_store (id, data, created_at, updated_at)
             VALUES (%(id)s, %(data)s, NOW(), NOW())
             """
         await self.session.execute(stmt, {
             'id': str(entity_id),
-            'data': json.dumps(events, cls=EventModelEncoder)
+            'data': entity_events.dumps()
         })
-        return events[-1]['version']
+        return entity_events.version
 
     async def get(self, entity_id, initial_version=0):
         stmt = """
         SELECT event_store.id, event_store.data, event_store.created_at
-        FROM event_store WHERE event_store.id = %(id)s AND CAST(data ? '$version' AS INTEGER) >= %(version)s;
+        FROM event_store WHERE event_store.id = %(id)s AND CAST(data ? '$version' AS INTEGER) >= %(version)s
         """
         await self.session.execute(stmt, {
             'id': str(entity_id),
@@ -60,7 +61,7 @@ class EventStoreRepository:
         event_store = await self.session.fetchone()
         if not event_store:
             raise ObjectDoesNotExist()
-        return sorted([EventModel.loads(event) for event in event_store[1]], key=attrgetter('version'))
+        return EventStream([EventModel.loads(event) for event in event_store[1]])
 
     def event_store(self):
         return self.EventStore
