@@ -25,6 +25,7 @@ setup(
         'pytest-pycodestyle',
         'pytest-cov',
         'pytest-asyncio',
+        'async_generator',
     ],
     zip_safe=False,
     classifiers=[
