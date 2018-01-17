@@ -7,6 +7,8 @@ python:
 - 'pypy3'
 services:
 - postgresql
+addons:
+  postgresql: "9.4"
 env:
 - DATABASE_URL=postgresql://postgresql@localhost/travis
 before_script:
