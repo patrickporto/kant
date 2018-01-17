@@ -8,9 +8,9 @@ python:
 services:
 - postgresql
 env:
-- DATABASE_URL=postgresql://postgresql@localhost/travis_ci_test
+- DATABASE_URL=postgresql://postgresql@localhost/test
 before_script:
-- psql -c 'create database travis_ci_test;' -U postgres
+- psql -c 'create database test;' -U postgres
 install:
 - pip install codecov
 script:
