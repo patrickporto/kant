@@ -5,6 +5,12 @@ python:
 - '3.6'
 - '3.6-dev'
 - 'pypy3'
+services:
+- postgresql
+env:
+- DATABSE_URL=postgresql://postgresql@localhost/travis_ci_test
+before_script:
+- psql -c 'create database travis_ci_test;' -U postgres
 install:
 - pip install codecov
 script:
