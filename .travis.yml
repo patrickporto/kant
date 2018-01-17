@@ -8,7 +8,7 @@ python:
 services:
 - postgresql
 env:
-- DATABSE_URL=postgresql://postgresql@localhost/travis_ci_test
+- DATABASE_URL=postgresql://postgresql@localhost/travis_ci_test
 before_script:
 - psql -c 'create database travis_ci_test;' -U postgres
 install:
