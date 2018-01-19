@@ -2,8 +2,6 @@ from operator import attrgetter
 from datetime import datetime
 import json
 
-from sqlalchemy.dialects.postgresql import JSONB
-import sqlalchemy as sa
 from .exceptions import ConsistencyError, ObjectDoesNotExist
 from kant.events.serializers import EventModelEncoder
 from kant.events import EventModel, EventStream
@@ -12,13 +10,6 @@ from kant.events import EventModel, EventStream
 class EventStoreRepository:
     def __init__(self, session, *args, **kwargs):
         self.session = session
-        self.EventStore = sa.Table('event_store', sa.MetaData(),  # NOQA
-            sa.Column('id', sa.String),
-            sa.Column('version', sa.Integer),
-            sa.Column('data', JSONB),
-            sa.Column('metadata', JSONB),
-            sa.Column('created', sa.DateTime, default=datetime.now()),
-        )
 
     async def save(self, entity_id, events, expected_version=0):
         """ Save the events in the model """
@@ -74,15 +65,3 @@ class EventStoreRepository:
         if not event_store:
             raise ObjectDoesNotExist()
         return EventStream.loads(event_store[0])
-
-    def event_store(self):
-        return self.EventStore
-
-
-class EventRepository():
-    def __init__(self, session):
-        self.session = session
-        self.event_store_repository = EventStoreRepository(session, self.event_store_name)
-
-    def event_store(self):
-        return self.event_store_repository.event_store()
