@@ -2,7 +2,7 @@ from copy import deepcopy
 from inflection import underscore
 
 
-class TrackedEntity:
+class Aggregate:
     def __init__(self):
         self._all_events = []
         self._events = []
