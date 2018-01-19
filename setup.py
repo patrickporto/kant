@@ -13,7 +13,6 @@ setup(
     install_requires=[
         'python-dateutil',
         'inflection',
-        'aiopg',
         'cuid.py',
     ],
     setup_requires=[
@@ -25,6 +24,7 @@ setup(
         'pytest-cov',
         'pytest-asyncio',
         'async_generator',
+        'aiopg',
     ],
     zip_safe=False,
     classifiers=[
@@ -38,7 +38,6 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy',
     ],
     keywords='eventsourcing cqrs eventstore',
 )
