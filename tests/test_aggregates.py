@@ -1,7 +1,7 @@
 import pytest
 from fixtures import BankAccountCreated, DepositPerformed
 from kant.models import TrackedEntity
-from kant.events import EventStream
+from kant.eventstore import EventStream
 
 
 @pytest.mark.asyncio
@@ -152,7 +152,9 @@ async def test_tracked_entity_should_return_new_events(dbsession):
     ])
     deposit_performed = DepositPerformed(
         amount=20,
-    )
+    )from .repositories import *  # NOQA
+from .models import *  # NOQA
+
     # act
     bank_account = BankAccount()
     bank_account.fetch_events(events)
