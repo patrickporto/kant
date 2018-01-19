@@ -11,7 +11,6 @@ setup(
     license='MIT',
     packages=['kant', 'kant.events'],
     install_requires=[
-        'sqlalchemy_utils',
         'python-dateutil',
         'inflection',
         'aiopg',
