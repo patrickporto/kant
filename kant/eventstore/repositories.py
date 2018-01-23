@@ -12,7 +12,7 @@ class EventStoreRepository:
     def __init__(self, session, *args, **kwargs):
         self.session = session
 
-    async def save(self, entity_id, events, expected_version=0):
+    async def save(self, aggregate_id, events, expected_version=0):
         """ Save the events in the model """
         async with self.session.begin() as transaction:
             events = events if isinstance(events, EventStream) else EventStream(events)
@@ -23,7 +23,7 @@ class EventStoreRepository:
                 FOR UPDATE
                 """
                 await self.session.execute(stmt_select, {
-                    'id': str(entity_id),
+                    'id': str(aggregate_id),
                     'version': expected_version,
                 })
                 event_store = await self.session.fetchone()
@@ -48,18 +48,18 @@ class EventStoreRepository:
                 VALUES (%(id)s, %(data)s, NOW(), NOW())
                 """
             await self.session.execute(stmt_save, {
-                'id': str(entity_id),
+                'id': str(aggregate_id),
                 'data': entity_events.dumps()
             })
             return entity_events.version
 
-    async def get(self, entity_id, initial_version=0):
+    async def get(self, aggregate_id, initial_version=0):
         stmt = """
         SELECT event_store.data
         FROM event_store WHERE event_store.id = %(id)s AND CAST(data ? '$version' AS INTEGER) >= %(version)s
         """
         await self.session.execute(stmt, {
-            'id': str(entity_id),
+            'id': str(aggregate_id),
             'version': initial_version,
         })
         event_store = await self.session.fetchone()
