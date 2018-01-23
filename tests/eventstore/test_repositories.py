@@ -1,9 +1,9 @@
 import json
 import pytest
 from fixtures import BankAccountCreated
-from kant import TrackedEntity
+from kant.aggregates import Aggregate
 from kant.exceptions import ObjectDoesNotExist
-from kant.repositories import EventStoreRepository
+from kant.eventstore.repositories import EventStoreRepository
 from kant.eventstore.schema import create_table
 
 

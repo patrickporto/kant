@@ -2,9 +2,10 @@ from operator import attrgetter
 from datetime import datetime
 import json
 
-from .exceptions import ConsistencyError, ObjectDoesNotExist
+from kant.exceptions import ConsistencyError, ObjectDoesNotExist
 from kant.events.serializers import EventModelEncoder
-from kant.events import EventModel, EventStream
+from kant.events import EventModel
+from kant.eventstore.stream import EventStream
 
 
 class EventStoreRepository:
