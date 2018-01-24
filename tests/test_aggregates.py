@@ -5,7 +5,7 @@ from kant.eventstore import EventStream
 
 
 @pytest.mark.asyncio
-async def test_tracked_entity_should_apply_one_event(dbsession):
+async def test_aggregate_should_apply_one_event(dbsession):
     # arrange
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
@@ -29,7 +29,7 @@ async def test_tracked_entity_should_apply_one_event(dbsession):
 
 
 @pytest.mark.asyncio
-async def test_tracked_entity_should_apply_many_events(dbsession):
+async def test_aggregate_should_apply_many_events(dbsession):
     # arrange
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
@@ -60,7 +60,7 @@ async def test_tracked_entity_should_apply_many_events(dbsession):
 
 
 @pytest.mark.asyncio
-async def test_tracked_entity_should_load_events(dbsession):
+async def test_aggregate_should_load_events(dbsession):
     # arrange
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
@@ -98,7 +98,7 @@ async def test_tracked_entity_should_load_events(dbsession):
 
 
 @pytest.mark.asyncio
-async def test_tracked_entity_should_apply_event_after_load_events(dbsession):
+async def test_aggregate_should_apply_event_after_load_events(dbsession):
     # arrange
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
@@ -132,7 +132,7 @@ async def test_tracked_entity_should_apply_event_after_load_events(dbsession):
 
 
 @pytest.mark.asyncio
-async def test_tracked_entity_should_return_new_events(dbsession):
+async def test_aggregate_should_return_new_events(dbsession):
     # arrange
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
@@ -166,7 +166,7 @@ async def test_tracked_entity_should_return_new_events(dbsession):
 
 
 @pytest.mark.asyncio
-async def test_tracked_entity_should_return_all_events(dbsession):
+async def test_aggregate_should_return_all_events(dbsession):
     # arrange
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
@@ -202,7 +202,7 @@ async def test_tracked_entity_should_return_all_events(dbsession):
 
 
 @pytest.mark.asyncio
-async def test_tracked_entity_should_return_stored_events(dbsession):
+async def test_aggregate_should_return_stored_events(dbsession):
     # arrange
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
