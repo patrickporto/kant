@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from kant.exceptions import EventDoesNotExist
+from kant.events.exceptions import EventDoesNotExist
 from kant.core.datamapper.base import ModelMeta, FieldMapping
 from kant.core.datamapper.fields import *  # NOQA
 

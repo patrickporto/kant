@@ -2,6 +2,7 @@ from abc import ABCMeta
 from pprint import pformat
 from collections import MutableMapping
 from kant.core.datamapper.fields import Field
+from kant.core.datamapper.exceptions import FieldError
 
 
 class ModelMeta(ABCMeta):
@@ -68,7 +69,11 @@ class FieldMapping(MutableMapping):
         if name.startswith('_'):
             super().__setattr__(name, value)
             return
-        self._values[name] = self.concrete_fields[name].parse(value)
+        try:
+            self._values[name] = self.concrete_fields[name].parse(value)
+        except KeyError:
+            msg = "The field '{0}' is not defined in '{1}'.".format(name, self.__class__.__name__)
+            raise FieldError(msg)
 
     def keys(self):
         return self._values.keys()

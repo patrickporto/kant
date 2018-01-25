@@ -1,0 +1,2 @@
+class EventDoesNotExist(Exception):
+    pass
