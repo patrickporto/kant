@@ -1,8 +1,10 @@
 from abc import ABCMeta
+from pprint import pformat
 from collections import MutableMapping
+from kant.events.fields import Field
 
 
-class EventModelMeta(ABCMeta):
+class ModelMeta(ABCMeta):
     def __new__(mcs, class_name, bases, attrs):
         concrete_fields = {}
         new_attrs = {}
@@ -18,7 +20,7 @@ class EventModelMeta(ABCMeta):
         return cls
 
 
-class EventFieldMapping(MutableMapping):
+class FieldMapping(MutableMapping):
     concrete_fields = {}
 
     def __init__(self, *args, **kwargs):

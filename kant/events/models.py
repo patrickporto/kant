@@ -1,16 +1,13 @@
 from abc import ABCMeta
-from pprint import pformat
 from kant.exceptions import EventDoesNotExist
-from kant.events.base import EventModelMeta, EventFieldMapping
+from kant.events.base import ModelMeta, FieldMapping
 from kant.events.fields import *  # NOQA
 
 
-class EventModel(EventFieldMapping, metaclass=EventModelMeta):
+class EventModel(FieldMapping, metaclass=ModelMeta):
     EVENTMODEL_JSON_COLUMN = '$type'
 
     version = IntegerField(default=0, json_column='$version')
-
-    __metaclass__ = EventModelMeta
 
     @classmethod
     def loads(self, obj):
@@ -36,7 +33,7 @@ class EventModel(EventFieldMapping, metaclass=EventModelMeta):
         return event
 
 
-class SchemaModel(EventFieldMapping, metaclass=EventModelMeta):
+class SchemaModel(FieldMapping, metaclass=ModelMeta):
 
     @classmethod
     def from_dict(self, obj, cls):
