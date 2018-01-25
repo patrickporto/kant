@@ -36,7 +36,7 @@ class EventModel(FieldMapping, metaclass=ModelMeta):
 class SchemaModel(FieldMapping, metaclass=ModelMeta):
 
     @classmethod
-    def from_dict(self, obj, cls):
+    def loads(self, obj, cls):
         Event = cls
         json_columns = {}
         for name, field in Event.concrete_fields.items():

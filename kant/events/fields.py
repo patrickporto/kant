@@ -157,4 +157,4 @@ class SchemaField(Field):
         """
         if isinstance(value, self.to):
             return value
-        return self.to().from_dict(value, cls=self.to)
+        return self.to().loads(value, cls=self.to)
