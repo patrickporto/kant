@@ -22,6 +22,18 @@ def test_queryset_should_filter_by_id_and_data():
     assert query() == (expected_operation, expected_parameters)
 
 
+def test_queryset_should_filter_by_id_list():
+    # arrange
+    aggregate1_id = 123
+    aggregate2_id = 456
+    # act
+    query = QuerySet().filter(id=[aggregate1_id, aggregate2_id])
+    # assert
+    expected_operation = 'SELECT * FROM event_store WHERE id IN (%(id)s)'
+    expected_parameters = {'id': [aggregate1_id, aggregate2_id]}
+    assert query() == (expected_operation, expected_parameters)
+
+
 def test_queryset_should_filter_by_event():
     # arrange
     aggregate_id = '123'
