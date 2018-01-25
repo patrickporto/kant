@@ -15,3 +15,7 @@ class ConsistencyError(Exception):
 
 class ObjectDoesNotExist(Exception):
     pass
+
+
+class EventDoesNotExist(Exception):
+    pass

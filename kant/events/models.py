@@ -5,6 +5,7 @@ from cuid import cuid
 from pprint import pformat
 from collections import MutableMapping
 from dateutil import parser as dateutil_parser
+from kant.exceptions import EventDoesNotExist
 
 
 class Field(metaclass=ABCMeta):
@@ -164,8 +165,6 @@ class SchemaField(Field):
 
 class EventModelMeta(ABCMeta):
     def __new__(mcs, class_name, bases, attrs):
-        if not hasattr(mcs, '_sub_cls'):
-            mcs._sub_cls = {}
         concrete_fields = {}
         new_attrs = {}
         for name, value in attrs.items():
@@ -177,8 +176,6 @@ class EventModelMeta(ABCMeta):
         cls = type.__new__(mcs, class_name, bases, new_attrs)
         cls.concrete_fields = cls.concrete_fields.copy()
         cls.concrete_fields.update(concrete_fields)
-        if class_name not in ['EventModel', 'SchemaModel']:
-            mcs._sub_cls[class_name] = cls
         return cls
 
 
@@ -261,25 +258,26 @@ class EventModel(EventFieldMapping, metaclass=EventModelMeta):
 
     __metaclass__ = EventModelMeta
 
-    def event_name(self):
-        return self.__class__.__name__
-
     @classmethod
     def loads(self, obj):
         event_name = obj[self.EVENTMODEL_JSON_COLUMN]
-        cls = self._sub_cls[event_name]
+        events = [Event for Event in self.__subclasses__() if Event.__name__ == event_name]
+        try:
+            Event = events[0]
+        except IndexError:
+            raise EventDoesNotExist()
         del obj[self.EVENTMODEL_JSON_COLUMN]
         json_columns = {}
-        for name, field in cls.concrete_fields.items():
+        for name, field in Event.concrete_fields.items():
             json_column = field.json_column or name
             json_columns[json_column] = name
         args = {json_columns[name]: value for name, value in obj.items()}
-        return cls(**args)
+        return Event(**args)
 
     def decode(self):
         event = {key: value for key, value in self.serializeditems()}
         event.update({
-            self.EVENTMODEL_JSON_COLUMN: self.event_name(),
+            self.EVENTMODEL_JSON_COLUMN: self.__class__.__name__,
         })
         return event
 
@@ -288,12 +286,13 @@ class SchemaModel(EventFieldMapping, metaclass=EventModelMeta):
 
     @classmethod
     def from_dict(self, obj, cls):
+        Event = cls
         json_columns = {}
-        for name, field in cls.concrete_fields.items():
+        for name, field in Event.concrete_fields.items():
             json_column = field.json_column or name
             json_columns[json_column] = name
         args = {json_columns[name]: value for name, value in obj.items()}
-        return cls(**args)
+        return Event(**args)
 
     def decode(self):
         event = {key: value for key, value in self.serializeditems()}

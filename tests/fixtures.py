@@ -6,10 +6,6 @@ class BankAccountCreated(models.EventModel):
     owner = models.CharField()
 
 
-class DepositPerformed(models.EventModel):
-    amount = models.DecimalField()
-
-
 class OwnerChanged(models.EventModel):
     new_owner = models.CharField()
 

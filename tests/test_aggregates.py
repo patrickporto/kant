@@ -1,7 +1,8 @@
 import pytest
-from fixtures import BankAccountCreated, DepositPerformed
+from fixtures import BankAccountCreated
 from kant.aggregates import Aggregate
 from kant.eventstore import EventStream
+from kant.events.models import EventModel, DecimalField
 
 
 @pytest.mark.asyncio
@@ -31,6 +32,9 @@ async def test_aggregate_should_apply_one_event(dbsession):
 @pytest.mark.asyncio
 async def test_aggregate_should_apply_many_events(dbsession):
     # arrange
+    class DepositPerformed(EventModel):
+        amount = DecimalField()
+
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -62,6 +66,9 @@ async def test_aggregate_should_apply_many_events(dbsession):
 @pytest.mark.asyncio
 async def test_aggregate_should_load_events(dbsession):
     # arrange
+    class DepositPerformed(EventModel):
+        amount = DecimalField()
+
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -100,6 +107,9 @@ async def test_aggregate_should_load_events(dbsession):
 @pytest.mark.asyncio
 async def test_aggregate_should_apply_event_after_load_events(dbsession):
     # arrange
+    class DepositPerformed(EventModel):
+        amount = DecimalField()
+
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -134,6 +144,9 @@ async def test_aggregate_should_apply_event_after_load_events(dbsession):
 @pytest.mark.asyncio
 async def test_aggregate_should_return_new_events(dbsession):
     # arrange
+    class DepositPerformed(EventModel):
+        amount = DecimalField()
+
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -168,6 +181,9 @@ async def test_aggregate_should_return_new_events(dbsession):
 @pytest.mark.asyncio
 async def test_aggregate_should_return_all_events(dbsession):
     # arrange
+    class DepositPerformed(EventModel):
+        amount = DecimalField()
+
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -204,6 +220,9 @@ async def test_aggregate_should_return_all_events(dbsession):
 @pytest.mark.asyncio
 async def test_aggregate_should_return_stored_events(dbsession):
     # arrange
+    class DepositPerformed(EventModel):
+        amount = DecimalField()
+
     class BankAccount(Aggregate):
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
