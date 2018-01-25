@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from pprint import pformat
 from collections import MutableMapping
-from kant.events.fields import Field
+from kant.core.datamapper.fields import Field
 
 
 class ModelMeta(ABCMeta):
