@@ -1,4 +1,4 @@
-from kant.eventstore import QuerySet
+from kant.eventstore import Query
 from tests.fixtures import BankAccountCreated
 
 
@@ -6,7 +6,7 @@ def test_queryset_should_filter_by_id():
     # arrange
     aggregate_id = 123
     # act
-    query = QuerySet().filter(id=aggregate_id)
+    query = Query().filter(id=aggregate_id)
     # assert
     assert query() == ('SELECT * FROM event_store WHERE id = %(id)s', {'id': aggregate_id})
 
@@ -15,7 +15,7 @@ def test_queryset_should_filter_by_id_and_data():
     # arrange
     aggregate_id = 123
     # act
-    query = QuerySet().filter(id=aggregate_id, data=None)
+    query = Query().filter(id=aggregate_id, data=None)
     # assert
     expected_operation = 'SELECT * FROM event_store WHERE id = %(id)s AND data = %(data)s'
     expected_parameters = {'id': aggregate_id, 'data': None}
@@ -27,7 +27,7 @@ def test_queryset_should_filter_by_id_list():
     aggregate1_id = 123
     aggregate2_id = 456
     # act
-    query = QuerySet().filter(id=[aggregate1_id, aggregate2_id])
+    query = Query().filter(id=[aggregate1_id, aggregate2_id])
     # assert
     expected_operation = 'SELECT * FROM event_store WHERE id IN (%(id)s)'
     expected_parameters = {'id': [aggregate1_id, aggregate2_id]}
@@ -42,7 +42,7 @@ def test_queryset_should_filter_by_event():
         owner='John Doe',
     )
     # act
-    query = QuerySet().filter(id=aggregate_id, data=bank_account_created)
+    query = Query().filter(id=aggregate_id, data=bank_account_created)
     # assert
     expected_operation = 'SELECT * FROM event_store WHERE id = %(id)s AND data @> %(data)s::jsonb'
     expected_param_event = {

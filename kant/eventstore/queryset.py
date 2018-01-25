@@ -1,7 +1,7 @@
 from kant.events.models import EventModel
 
 
-class QuerySet:
+class Query:
     def __init__(self):
         self._where = []
         self._parameters = {}
