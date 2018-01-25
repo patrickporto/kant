@@ -31,7 +31,7 @@ class Aggregate:
             self.dispatch(event, flush=False)
 
     def apply(self, event):
-        event_name = underscore(event.event_name())
+        event_name = underscore(event.__class__.__name__)
         method_name = 'apply_{0}'.format(event_name)
         method = getattr(self, method_name)
         method(event)
