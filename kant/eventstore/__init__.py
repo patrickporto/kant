@@ -1,2 +1,2 @@
 from .stream import *  # NOQA
-from .queryset import *  # NOQA
+from .query import *  # NOQA
