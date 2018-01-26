@@ -10,7 +10,7 @@ class EventStream:
         self.version = version
 
     def __eq__(self, event_stream):
-        return event_stream.version == event_stream.version
+        return self.version == event_stream.version
 
     def __len__(self):
         return len(self._events)
