@@ -11,7 +11,7 @@ class EventModel(FieldMapping, metaclass=ModelMeta):
     version = IntegerField(default=0, json_column='$version')
 
     @classmethod
-    def loads(self, obj):
+    def make(self, obj):
         event_name = obj[self.EVENTMODEL_JSON_COLUMN]
         events = [Event for Event in self.__subclasses__() if Event.__name__ == event_name]
         try:

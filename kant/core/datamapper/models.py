@@ -4,7 +4,7 @@ from kant.core.datamapper.base import ModelMeta, FieldMapping
 class SchemaModel(FieldMapping, metaclass=ModelMeta):
 
     @classmethod
-    def loads(self, obj, cls):
+    def make(self, obj, cls):
         Event = cls
         json_columns = {}
         for name, field in Event.concrete_fields.items():

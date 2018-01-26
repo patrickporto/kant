@@ -13,7 +13,7 @@ def test_eventmodel_should_encode_obj():
         'amount': 20,
     }
     # act
-    my_event_model = EventModel.loads(serialized)
+    my_event_model = EventModel.make(serialized)
     # assert
     assert isinstance(my_event_model, MyEventModel), type(my_event_model)
     assert my_event_model.amount == 20
@@ -27,4 +27,4 @@ def test_eventmodel_should_raise_when_encode_invalid_obj():
     }
     # act and assert
     with pytest.raises(EventDoesNotExist):
-        my_event_model = EventModel.loads(serialized)
+        my_event_model = EventModel.make(serialized)

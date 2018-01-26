@@ -57,4 +57,4 @@ class EventStream:
 
     @classmethod
     def make(self, obj):
-        return EventStream([EventModel.loads(event) for event in obj])
+        return EventStream([EventModel.make(event) for event in obj])
