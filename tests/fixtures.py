@@ -4,6 +4,7 @@ from kant.events import models
 class BankAccountCreated(models.EventModel):
     id = models.CUIDField(primary_key=True)
     owner = models.CharField()
+    __empty_stream__ = True
 
 
 class DepositPerformed(models.EventModel):

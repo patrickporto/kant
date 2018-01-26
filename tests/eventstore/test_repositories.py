@@ -122,20 +122,13 @@ async def test_save_should_raise_version_error_when_diff(dbsession):
             events=events_base,
         )
         # act
-        stored_events = await event_store_repository.get(
-            aggregate_id=aggregate_id,
-        )
-        stored_events_1 = deepcopy(stored_events)
-        stored_events_2 = deepcopy(stored_events)
-        stored_events_1 += events_1
-        stored_events_2 += events_2
         await event_store_repository.save(
             aggregate_id=aggregate_id,
-            events=stored_events_1,
+            events=events_1,
         )
         # assert
         with pytest.raises(VersionError):
             await event_store_repository.save(
                 aggregate_id=aggregate_id,
-                events=stored_events_2,
+                events=events_2,
             )

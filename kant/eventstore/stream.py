@@ -1,8 +1,8 @@
 from operator import attrgetter
-from copy import deepcopy
 import json
 from kant.events.models import EventModel
 from kant.events.serializers import EventModelEncoder
+from kant.eventstore.exceptions import StreamExists
 
 
 class EventStream:
@@ -46,8 +46,15 @@ class EventStream:
     def __repr__(self):
         return str(list(self))
 
+    def _conflict_resolution(self, event):
+        if event.__empty_stream__ and len(self._events) > 0:
+            msg = "The EventStream is not empty. The Event '{}' cannot be added.".format(event.__class__.__name__)
+            raise StreamExists(msg)
+        return event
+
     def add(self, event):
         if event not in self._events:
+            event = self._conflict_resolution(event)
             self.current_version += 1
             event.version = self.current_version
             self._events.add(event)
