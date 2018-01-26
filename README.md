@@ -22,7 +22,7 @@ Create declarative events
 from kant.events import models
 
 class BankAccountCreated(models.EventModel):
-    id = models.UUIDField(primary_key=True)
+    id = models.CUIDField(primary_key=True)
     owner = models.CharField()
 
 class DepositPerformed(models.EventModel):

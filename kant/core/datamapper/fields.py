@@ -22,12 +22,12 @@ class Field(metaclass=ABCMeta):
         return self.default
 
 
-class UUIDField(Field):
+class CUIDField(Field):
     def __init__(self, primary_key=False, *args, **kwargs):
         self.primary_key = primary_key
         super().__init__(*args, **kwargs)
         if self.primary_key:
-            self.default = lambda: cuid()
+            self.default = cuid
 
     def encode(self, value):
         return str(value)
