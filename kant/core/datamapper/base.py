@@ -62,15 +62,15 @@ class FieldMapping(MutableMapping):
 
     def __getattr__(self, name):
         if name not in self.concrete_fields:
-            raise AttributeError(name)
+            return super().__getattribute__(name)
         return self._values[name]
 
     def __setattr__(self, name, value):
-        if name.startswith('_'):
-            super().__setattr__(name, value)
-            return
+        if name not in self.concrete_fields:
+            return super().__setattr__(name, value)
         try:
-            self._values[name] = self.concrete_fields[name].parse(value)
+            if value is not None:
+                self._values[name] = self.concrete_fields[name].parse(value)
         except KeyError:
             msg = "The field '{0}' is not defined in '{1}'.".format(name, self.__class__.__name__)
             raise FieldError(msg)
@@ -79,7 +79,7 @@ class FieldMapping(MutableMapping):
         return self._values.keys()
 
     def __repr__(self):
-        return '<{0} {1}>'.format(self.__class__.__name__, pformat(dict(self)))
+        return '<{0} {1}>'.format(self.__class__.__name__, pformat(self._values))
 
     def copy(self):
         return self.__class__(self)

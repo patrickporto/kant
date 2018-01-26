@@ -1,13 +1,15 @@
 from copy import deepcopy
+import json
 from inflection import underscore
+from kant.core.datamapper.base import ModelMeta, FieldMapping
 
 
-class Aggregate:
+class Aggregate(FieldMapping, metaclass=ModelMeta):
     def __init__(self):
+        super().__init__()
         self._all_events = []
         self._events = []
         self._stored_events = []
-        self.id = None
         self.version = -1
         self.current_version = -1
 
@@ -43,3 +45,7 @@ class Aggregate:
         if flush:
             self._events.append(event)
             self._all_events.append(event)
+
+    def json(self):
+        data = {key: value for key, value in self.serializeditems()}
+        return json.dumps(data, sort_keys=True)
