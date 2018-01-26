@@ -151,9 +151,9 @@ class SchemaField(Field):
         >>> account = AccountSchemaModel(balance=25.5)
         >>> field = SchemaField(to=AccountSchemaModel)
         >>> field.parse(account)
-        <AccountSchemaModel {'balance': Decimal('25.5')}>
+        <AccountSchemaModel: {'balance': Decimal('25.5')}>
         >>> field.parse({"balance": 30 })
-        <AccountSchemaModel {'balance': Decimal('30')}>
+        <AccountSchemaModel: {'balance': Decimal('30')}>
         """
         if isinstance(value, self.to):
             return value

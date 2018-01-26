@@ -1,5 +1,4 @@
 from abc import ABCMeta
-from pprint import pformat
 from collections import MutableMapping
 from kant.core.datamapper.fields import Field
 from kant.core.datamapper.exceptions import FieldError
@@ -79,7 +78,7 @@ class FieldMapping(MutableMapping):
         return self._values.keys()
 
     def __repr__(self):
-        return '<{0} {1}>'.format(self.__class__.__name__, pformat(self._values))
+        return '<{0}: {1}>'.format(self.__class__.__name__, self._values)
 
     def copy(self):
         return self.__class__(self)
