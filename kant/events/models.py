@@ -2,6 +2,7 @@ from abc import ABCMeta
 from kant.events.exceptions import EventDoesNotExist
 from kant.core.datamapper.base import ModelMeta, FieldMapping
 from kant.core.datamapper.fields import *  # NOQA
+from kant.core.datamapper.models import *  # NOQA
 
 
 class EventModel(FieldMapping, metaclass=ModelMeta):
@@ -30,21 +31,4 @@ class EventModel(FieldMapping, metaclass=ModelMeta):
         event.update({
             self.EVENTMODEL_JSON_COLUMN: self.__class__.__name__,
         })
-        return event
-
-
-class SchemaModel(FieldMapping, metaclass=ModelMeta):
-
-    @classmethod
-    def loads(self, obj, cls):
-        Event = cls
-        json_columns = {}
-        for name, field in Event.concrete_fields.items():
-            json_column = field.json_column or name
-            json_columns[json_column] = name
-        args = {json_columns[name]: value for name, value in obj.items()}
-        return Event(**args)
-
-    def decode(self):
-        event = {key: value for key, value in self.serializeditems()}
         return event
