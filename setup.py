@@ -1,4 +1,12 @@
+from os import path
 from setuptools import setup
+
+
+BASE_DIR = path.dirname(__file__)
+
+
+with open(path.join(BASE_DIR, 'README.md')) as f:
+    long_description = f.read()
 
 
 setup(
@@ -9,12 +17,13 @@ setup(
     author='Patrick Porto',
     author_email='patrick.s.porto@gmail.com',
     license='MIT',
-    packages=['kant', 'kant.events'],
+    packages=['kant', 'kant.core', 'kant.events', 'kant.eventstore'],
     install_requires=[
         'python-dateutil',
         'inflection',
         'cuid.py',
     ],
+    long_description=long_description,
     setup_requires=[
         'pytest-runner',
     ],
