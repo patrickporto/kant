@@ -12,7 +12,7 @@ class EventStoreRepository:
     def __init__(self, session, *args, **kwargs):
         self.session = session
 
-    async def create(self, aggregate_id, events: EventStream, expected_version=0):
+    async def update(self, aggregate_id, events: EventStream):
         async with self.session.begin() as transaction:
             stmt_select = """
             SELECT event_store.data
@@ -21,16 +21,16 @@ class EventStoreRepository:
             """
             await self.session.execute(stmt_select, {
                 'id': str(aggregate_id),
-                'version': expected_version,
+                'version': events.initial_version,
             })
             event_store = await self.session.fetchone()
             if not event_store:
                 raise ObjectDoesNotExist()
-            stored_events = EventStream.loads(event_store[0])
-            if stored_events.version != expected_version:
+            stored_events = EventStream.make(event_store[0])
+            if stored_events > events:
                 raise VersionError(
-                    current_version=events[-1]['version'],
-                    expected_version=expected_version,
+                    current_version=stored_events.initial_version,
+                    expected_version=events.initial_version,
                     ours=events,
                     theirs=stored_events,
                 )
@@ -43,7 +43,7 @@ class EventStoreRepository:
                 'data': stored_events.decode(),
             })
 
-    async def update(self, aggregate_id, events: EventStream, expected_version=0):
+    async def create(self, aggregate_id, events: EventStream):
         stmt = """
         INSERT INTO event_store (id, data, created_at, updated_at)
         VALUES (%(id)s, %(data)s, NOW(), NOW())
@@ -53,12 +53,12 @@ class EventStoreRepository:
             'data': events.decode(),
         })
 
-    async def save(self, aggregate_id, events: EventStream, expected_version=0):
+    async def save(self, aggregate_id, events: EventStream):
         """ Save the events in the model """
         try:
-            await self.update(aggregate_id, events, expected_version)
+            await self.update(aggregate_id, events)
         except ObjectDoesNotExist:
-            await self.create(aggregate_id, events, expected_version)
+            await self.create(aggregate_id, events)
         return events.current_version
 
     async def get(self, aggregate_id, initial_version=0):
@@ -73,4 +73,4 @@ class EventStoreRepository:
         event_store = await self.session.fetchone()
         if not event_store:
             raise ObjectDoesNotExist()
-        return EventStream.loads(event_store[0])
+        return EventStream.make(event_store[0])

@@ -17,13 +17,28 @@ class EventStream:
     def __eq__(self, event_stream):
         return self.current_version == event_stream.current_version
 
+    def __lt__(self, event_stream):
+        return self.current_version < event_stream.current_version
+
+    def __le__(self, event_stream):
+        return self.current_version <= event_stream.current_version
+
+    def __ne__(self, event_stream):
+        return self.current_version != event_stream.current_version
+
+    def __gt__(self, event_stream):
+        return self.current_version > event_stream.current_version
+
+    def __ge__(self, event_stream):
+        return self.current_version >= event_stream.current_version
+
     def __len__(self):
         return len(self._events)
 
     def __add__(self, event_stream):
-        events = self._events + event_stream.events
-        events.sort(key=attrgetter('version'))
-        return EventStream(events, events[-1].version)
+        for event in event_stream:
+            self.add(event)
+        return self
 
     def __iter__(self):
         return iter(sorted(self._events, key=attrgetter('version')))
@@ -41,5 +56,5 @@ class EventStream:
         return json.dumps(list(self._events), cls=EventModelEncoder)
 
     @classmethod
-    def loads(self, obj):
+    def make(self, obj):
         return EventStream([EventModel.loads(event) for event in obj])

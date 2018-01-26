@@ -1,8 +1,9 @@
+from copy import deepcopy
 import json
 import pytest
-from fixtures import BankAccountCreated
+from fixtures import BankAccountCreated, DepositPerformed, WithdrawalPerformed
 from kant.aggregates import Aggregate
-from kant.exceptions import ObjectDoesNotExist
+from kant.exceptions import ObjectDoesNotExist, VersionError
 from kant.eventstore.repositories import EventStoreRepository
 from kant.eventstore.schema import create_table
 from kant.eventstore.stream import EventStream
@@ -90,4 +91,51 @@ async def test_get_should_raise_exception_when_not_found(dbsession):
         with pytest.raises(ObjectDoesNotExist):
             await event_store_repository.get(
                 aggregate_id=aggregate_id,
+            )
+
+
+@pytest.mark.asyncio
+async def test_save_should_raise_version_error_when_diff(dbsession):
+    # arrange
+    await create_table(dbsession)
+    aggregate_id = 'f2283f9d-9ed2-4385-a614-53805725cbac',
+    events_base = EventStream([
+        BankAccountCreated(
+            id=aggregate_id,
+            owner='John Doe'
+        )
+    ])
+    events_1 = EventStream([
+        DepositPerformed(
+            amount=20
+        )
+    ])
+    events_2 = EventStream([
+        WithdrawalPerformed(
+            amount=20
+        )
+    ])
+    async with dbsession.cursor() as cursor:
+        event_store_repository = EventStoreRepository(cursor)
+        await event_store_repository.save(
+            aggregate_id=aggregate_id,
+            events=events_base,
+        )
+        # act
+        stored_events = await event_store_repository.get(
+            aggregate_id=aggregate_id,
+        )
+        stored_events_1 = deepcopy(stored_events)
+        stored_events_2 = deepcopy(stored_events)
+        stored_events_1 += events_1
+        stored_events_2 += events_2
+        await event_store_repository.save(
+            aggregate_id=aggregate_id,
+            events=stored_events_1,
+        )
+        # assert
+        with pytest.raises(VersionError):
+            await event_store_repository.save(
+                aggregate_id=aggregate_id,
+                events=stored_events_2,
             )
