@@ -182,7 +182,7 @@ async def test_aggregate_should_return_new_events(dbsession):
     bank_account = BankAccount()
     bank_account.fetch_events(events)
     bank_account.dispatch(deposit_performed)
-    result = bank_account.get_events()
+    result = list(bank_account.get_events())
     # assert
     assert len(result) == 1
     assert result[0].version == 1
@@ -205,13 +205,13 @@ async def test_aggregate_should_return_all_events(dbsession):
         def apply_deposit_performed(self, event):
             self.balance += event.get('amount')
 
-    events = [
+    events = EventStream([
         BankAccountCreated(
             id=123,
             owner='John Doe',
             version=0,
         )
-    ]
+    ])
     deposit_performed = DepositPerformed(
         amount=20,
     )
@@ -219,7 +219,7 @@ async def test_aggregate_should_return_all_events(dbsession):
     bank_account = BankAccount()
     bank_account.fetch_events(events)
     bank_account.dispatch(deposit_performed)
-    result = bank_account.all_events()
+    result = list(bank_account.all_events())
     # assert
     assert len(result) == 2
     assert result[0].version == 0
@@ -259,7 +259,7 @@ async def test_aggregate_should_return_stored_events(dbsession):
     bank_account = BankAccount()
     bank_account.fetch_events(events)
     bank_account.dispatch(deposit_performed)
-    result = bank_account.stored_events()
+    result = list(bank_account.stored_events())
     # assert
     assert len(result) == 1
     assert result[0].version == 0

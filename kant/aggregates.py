@@ -2,16 +2,15 @@ from copy import deepcopy
 import json
 from inflection import underscore
 from kant.core.datamapper.base import ModelMeta, FieldMapping
+from kant.eventstore.stream import EventStream
 
 
 class Aggregate(FieldMapping, metaclass=ModelMeta):
     def __init__(self):
         super().__init__()
-        self._all_events = []
-        self._events = []
-        self._stored_events = []
-        self.version = -1
-        self.current_version = -1
+        self._all_events = EventStream()
+        self._events = EventStream()
+        self._stored_events = EventStream()
 
     def all_events(self):
         return self._all_events
@@ -23,13 +22,12 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
         return self._events
 
     def clear_events(self):
-        self._events = []
+        self._events = EventStream()
 
-    def fetch_events(self, events):
+    def fetch_events(self, events: EventStream):
         self._stored_events = deepcopy(events)
-        self._all_events = deepcopy(events)
+        self._all_events = deepcopy(self._stored_events)
         for event in events:
-            self.version += 1
             self.dispatch(event, flush=False)
 
     def apply(self, event):
@@ -39,13 +37,19 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
         method(event)
 
     def dispatch(self, event, flush=True):
-        self.current_version += 1
-        event.version = self.current_version
         self.apply(event)
         if flush:
-            self._events.append(event)
-            self._all_events.append(event)
+            self._events.add(event)
+            self._all_events.add(event)
 
     def json(self):
         data = {key: value for key, value in self.serializeditems()}
         return json.dumps(data, sort_keys=True)
+
+    @property
+    def current_version(self):
+        return self._all_events.current_version
+
+    @property
+    def version(self):
+        return self._all_events.initial_version

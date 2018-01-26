@@ -12,8 +12,7 @@ class EventStoreRepository:
     def __init__(self, session, *args, **kwargs):
         self.session = session
 
-    async def create(self, aggregate_id, events, expected_version=0):
-        events = events if isinstance(events, EventStream) else EventStream(events)
+    async def create(self, aggregate_id, events: EventStream, expected_version=0):
         async with self.session.begin() as transaction:
             stmt_select = """
             SELECT event_store.data
@@ -41,27 +40,26 @@ class EventStoreRepository:
             """
             await self.session.execute(stmt_update, {
                 'id': str(aggregate_id),
-                'data': stored_events.dumps()
+                'data': stored_events.decode(),
             })
 
-    async def update(self, aggregate_id, events, expected_version=0):
-        events = events if isinstance(events, EventStream) else EventStream(events)
+    async def update(self, aggregate_id, events: EventStream, expected_version=0):
         stmt = """
         INSERT INTO event_store (id, data, created_at, updated_at)
         VALUES (%(id)s, %(data)s, NOW(), NOW())
         """
         await self.session.execute(stmt, {
             'id': str(aggregate_id),
-            'data': events.dumps()
+            'data': events.decode(),
         })
 
-    async def save(self, aggregate_id, events, expected_version=0):
+    async def save(self, aggregate_id, events: EventStream, expected_version=0):
         """ Save the events in the model """
         try:
             await self.update(aggregate_id, events, expected_version)
         except ObjectDoesNotExist:
             await self.create(aggregate_id, events, expected_version)
-        return events[-1].version
+        return events.current_version
 
     async def get(self, aggregate_id, initial_version=0):
         stmt = """

@@ -5,6 +5,7 @@ from kant.aggregates import Aggregate
 from kant.exceptions import ObjectDoesNotExist
 from kant.eventstore.repositories import EventStoreRepository
 from kant.eventstore.schema import create_table
+from kant.eventstore.stream import EventStream
 
 
 @pytest.mark.asyncio
@@ -12,12 +13,12 @@ async def test_save_should_create_event_store(dbsession):
     # arrange
     await create_table(dbsession)
     aggregate_id = '052c21b6-aab9-4311-b954-518cd04f704c'
-    events = [
+    events = EventStream([
         BankAccountCreated(
             id=aggregate_id,
             owner='John Doe'
         )
-    ]
+    ])
     # act
     async with dbsession.cursor() as cursor:
         event_store_repository = EventStoreRepository(cursor)
@@ -70,6 +71,7 @@ async def test_get_should_return_events(dbsession):
         event_store_repository = EventStoreRepository(cursor)
         stored_events = await event_store_repository.get(aggregate_id)
         # assert
+        stored_events = list(stored_events)
         assert len(stored_events) == 1
         assert isinstance(stored_events[0], BankAccountCreated)
         assert stored_events[0].version == 0

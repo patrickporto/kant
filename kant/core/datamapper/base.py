@@ -89,6 +89,9 @@ class FieldMapping(MutableMapping):
     def __iter__(self):
         return iter(self._values)
 
+    def __hash__(self):
+        return id(self)
+
     def serializeditems(self):
         for name, value in self._values.items():
             field_name = self.concrete_fields[name].json_column or name
