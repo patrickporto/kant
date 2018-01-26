@@ -7,8 +7,9 @@ from kant.core.datamapper.models import *  # NOQA
 
 class EventModel(FieldMapping, metaclass=ModelMeta):
     EVENTMODEL_JSON_COLUMN = '$type'
-    __empty_stream__ = False
     version = IntegerField(default=0, json_column='$version')
+    __empty_stream__ = False
+    __dependencies__ = []
 
     @classmethod
     def make(self, obj):

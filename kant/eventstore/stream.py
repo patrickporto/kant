@@ -2,7 +2,7 @@ from operator import attrgetter
 import json
 from kant.events.models import EventModel
 from kant.events.serializers import EventModelEncoder
-from kant.eventstore.exceptions import StreamExists
+from kant.eventstore.exceptions import StreamExists, DependencyDoesNotExist
 
 
 class EventStream:
@@ -46,10 +46,19 @@ class EventStream:
     def __repr__(self):
         return str(list(self))
 
-    def _conflict_resolution(self, event):
+    def _valid_empty_stream(self, event):
         if event.__empty_stream__ and len(self._events) > 0:
-            msg = "The EventStream is not empty. The Event '{}' cannot be added.".format(event.__class__.__name__)
-            raise StreamExists(msg)
+            raise StreamExists(event)
+
+    def _valid_dependencies(self, event):
+        event_names = [event.__class__.__name__ for event in self._events]
+        not_found = [event for event in event.__dependencies__ if event not in event_names]
+        if len(not_found) > 0:
+            raise DependencyDoesNotExist(event, not_found)
+
+    def _conflict_resolution(self, event):
+        self._valid_empty_stream(event)
+        self._valid_dependencies(event)
         return event
 
     def add(self, event):
