@@ -2,7 +2,7 @@ from operator import attrgetter
 from datetime import datetime
 import json
 
-from kant.exceptions import ConsistencyError, ObjectDoesNotExist
+from kant.exceptions import VersionError, ObjectDoesNotExist
 from kant.events.serializers import EventModelEncoder
 from kant.events import EventModel
 from kant.eventstore.stream import EventStream
@@ -28,7 +28,7 @@ class EventStoreRepository:
                 raise ObjectDoesNotExist()
             stored_events = EventStream.loads(event_store[0])
             if stored_events.version != expected_version:
-                raise ConsistencyError(
+                raise VersionError(
                     current_version=events[-1]['version'],
                     expected_version=expected_version,
                     ours=events,
