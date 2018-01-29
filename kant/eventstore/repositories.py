@@ -65,11 +65,11 @@ class EventStoreRepository:
         SELECT event_store.data
         FROM event_store WHERE event_store.id = %(id)s AND CAST(data ? '$version' AS INTEGER) >= %(version)s
         """
-        result = await self.session.execute(stmt, {
+        await self.session.execute(stmt, {
             'id': str(aggregate_id),
             'version': initial_version,
         })
-        if not result:
+        event_store = await self.session.fetchone()
+        if not event_store:
             raise ObjectDoesNotExist()
-        event_store = await result.fetchone()
         return EventStream.make(event_store[0])
