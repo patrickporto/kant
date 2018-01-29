@@ -11,7 +11,7 @@ with open(path.join(BASE_DIR, 'README.md')) as f:
 
 setup(
     name='kant',
-    version='1.1.1',
+    version='1.1.2',
     description='The CQRS and Event Sourcing framework for Python',
     url='http://github.com/patrickporto/kant',
     author='Patrick Porto',
@@ -22,6 +22,7 @@ setup(
         'python-dateutil',
         'inflection',
         'cuid.py',
+        'async_generator',
     ],
     long_description=long_description,
     setup_requires=[
@@ -32,7 +33,6 @@ setup(
         'pytest-pycodestyle',
         'pytest-cov',
         'pytest-asyncio',
-        'async_generator',
         'aiopg',
     ],
     zip_safe=False,
