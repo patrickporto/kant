@@ -11,7 +11,7 @@ with open(path.join(BASE_DIR, 'README.md')) as f:
 
 setup(
     name='kant',
-    version='1.1.0',
+    version='1.1.1',
     description='The CQRS and Event Sourcing framework for Python',
     url='http://github.com/patrickporto/kant',
     author='Patrick Porto',
