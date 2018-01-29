@@ -17,7 +17,7 @@ setup(
     author='Patrick Porto',
     author_email='patrick.s.porto@gmail.com',
     license='MIT',
-    packages=['kant', 'kant.core', 'kant.core.datamapper', 'kant.events', 'kant.eventstore'],
+    packages=['kant', 'kant.datamapper', 'kant.events', 'kant.eventstore'],
     install_requires=[
         'python-dateutil',
         'inflection',

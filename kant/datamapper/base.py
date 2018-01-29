@@ -1,7 +1,8 @@
 from abc import ABCMeta
 from collections import MutableMapping
-from kant.core.datamapper.fields import Field
-from kant.core.datamapper.exceptions import FieldError
+import json
+from .fields import Field
+from .exceptions import FieldError
 
 
 class ModelMeta(ABCMeta):
@@ -97,3 +98,7 @@ class FieldMapping(MutableMapping):
             field_name = self.concrete_fields[name].json_column or name
             field_value = self.concrete_fields[name].encode(value)
             yield (field_name, field_value)
+
+    def json(self):
+        data = {key: value for key, value in self.serializeditems()}
+        return json.dumps(data, sort_keys=True)

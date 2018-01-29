@@ -1,8 +1,8 @@
 from copy import deepcopy
-import json
 from inflection import underscore
-from kant.core.datamapper.base import ModelMeta, FieldMapping
 from kant.eventstore.stream import EventStream
+from kant.datamapper.base import ModelMeta, FieldMapping
+from kant.datamapper.fields import *  # NOQA
 
 
 class Aggregate(FieldMapping, metaclass=ModelMeta):
@@ -41,10 +41,6 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
         if flush:
             self._events.add(event)
             self._all_events.add(event)
-
-    def json(self):
-        data = {key: value for key, value in self.serializeditems()}
-        return json.dumps(data, sort_keys=True)
 
     @property
     def current_version(self):

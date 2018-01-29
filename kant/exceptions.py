@@ -1,3 +1,3 @@
-from kant.core.datamapper.exceptions import *  # NOQA
-from kant.events.exceptions import *  # NOQA
-from kant.eventstore.exceptions import *  # NOQA
+from .datamapper.exceptions import *  # NOQA
+from .events.exceptions import *  # NOQA
+from .eventstore.exceptions import *  # NOQA

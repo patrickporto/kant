@@ -1,8 +1,7 @@
 import pytest
 from fixtures import BankAccountCreated, DepositPerformed
-from kant.aggregates import Aggregate
+from kant.aggregates import Aggregate, models
 from kant.eventstore import EventStream
-from kant.events import models
 
 
 @pytest.mark.asyncio

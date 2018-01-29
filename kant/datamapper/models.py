@@ -1,4 +1,4 @@
-from kant.core.datamapper.base import ModelMeta, FieldMapping
+from .base import ModelMeta, FieldMapping
 
 
 class SchemaModel(FieldMapping, metaclass=ModelMeta):
