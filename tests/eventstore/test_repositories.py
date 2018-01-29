@@ -12,7 +12,6 @@ from kant.eventstore.stream import EventStream
 @pytest.mark.asyncio
 async def test_save_should_create_event_store(dbsession):
     # arrange
-    await create_table(dbsession)
     aggregate_id = '052c21b6-aab9-4311-b954-518cd04f704c'
     events = EventStream([
         BankAccountCreated(
@@ -20,8 +19,9 @@ async def test_save_should_create_event_store(dbsession):
             owner='John Doe'
         )
     ])
-    # act
     async with dbsession.cursor() as cursor:
+        await create_table(cursor)
+        # act
         event_store_repository = EventStoreRepository(cursor)
         last_version = await event_store_repository.save(
             aggregate_id=aggregate_id,
@@ -52,13 +52,13 @@ async def test_save_should_create_event_store(dbsession):
 @pytest.mark.asyncio
 async def test_get_should_return_events(dbsession):
     # arrange
-    await create_table(dbsession)
     stmt = """
     INSERT INTO event_store (id, data, created_at, updated_at)
     VALUES (%(id)s, %(data)s, NOW(), NOW())
     """
     aggregate_id = 'e0fbeecc-d68f-45b1-83c7-5cbc65f78af7'
     async with dbsession.cursor() as cursor:
+        await create_table(cursor)
         await cursor.execute(stmt, {
             'id': aggregate_id,
             'data': json.dumps([{
@@ -83,9 +83,9 @@ async def test_get_should_return_events(dbsession):
 @pytest.mark.asyncio
 async def test_get_should_raise_exception_when_not_found(dbsession):
     # arrange
-    await create_table(dbsession)
     aggregate_id = 'f2283f9d-9ed2-4385-a614-53805725cbac',
     async with dbsession.cursor() as cursor:
+        await create_table(cursor)
         event_store_repository = EventStoreRepository(cursor)
         # act and assert
         with pytest.raises(ObjectDoesNotExist):
@@ -97,7 +97,6 @@ async def test_get_should_raise_exception_when_not_found(dbsession):
 @pytest.mark.asyncio
 async def test_save_should_raise_version_error_when_diff(dbsession):
     # arrange
-    await create_table(dbsession)
     aggregate_id = 'f2283f9d-9ed2-4385-a614-53805725cbac',
     events_base = EventStream([
         BankAccountCreated(
@@ -116,6 +115,7 @@ async def test_save_should_raise_version_error_when_diff(dbsession):
         )
     ])
     async with dbsession.cursor() as cursor:
+        await create_table(cursor)
         event_store_repository = EventStoreRepository(cursor)
         await event_store_repository.save(
             aggregate_id=aggregate_id,
