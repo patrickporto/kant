@@ -22,7 +22,8 @@ async def test_queryset_should_filter_by_id(dbsession):
         # act
         with patch.object(cursor, 'execute', side_effect=execute) as mock_execute:
             query = Query(cursor).filter(id=aggregate_id)
-            [r async for r in query]
+            async for r in query:
+                pass
         # assert
         expected_operation = 'SELECT * FROM event_store WHERE id = %(id)s'
         expected_parameters = {'id': aggregate_id}
@@ -46,7 +47,8 @@ async def test_queryset_should_filter_by_id_and_data(dbsession):
         # act
         with patch.object(cursor, 'execute', side_effect=execute) as mock_execute:
             query = Query(cursor).filter(id=aggregate_id, data=None)
-            [r async for r in query]
+            async for r in query:
+                pass
         # assert
         expected_operation = 'SELECT * FROM event_store WHERE id = %(id)s AND data = %(data)s'
         expected_parameters = {'id': aggregate_id, 'data': None}
@@ -71,7 +73,8 @@ async def test_queryset_should_filter_by_id_list(dbsession):
         # act
         with patch.object(cursor, 'execute', side_effect=execute) as mock_execute:
             query = Query(cursor).filter(id=[aggregate1_id, aggregate2_id])
-            [r async for r in query]
+            async for r in query:
+                pass
         # assert
         expected_operation = 'SELECT * FROM event_store WHERE id IN (%(id)s)'
         expected_parameters = {'id': [aggregate1_id, aggregate2_id]}
@@ -99,7 +102,8 @@ async def test_queryset_should_filter_by_event(dbsession):
         # act
         with patch.object(cursor, 'execute', side_effect=execute) as mock_execute:
             query = Query(cursor).filter(id=aggregate_id, data=bank_account_created)
-            [r async for r in query]
+            async for r in query:
+                pass
         # assert
         expected_operation = 'SELECT * FROM event_store WHERE id = %(id)s AND data @> %(data)s::jsonb'
         expected_param_event = {

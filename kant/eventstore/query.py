@@ -1,3 +1,4 @@
+from async_generator import yield_, async_generator
 from kant.events.models import EventModel
 
 
@@ -7,13 +8,14 @@ class Query:
         self._where = []
         self._parameters = {}
 
+    @async_generator
     async def __aiter__(self):
         operation = 'SELECT * FROM event_store'
         operation += self._stmt_parameters()
         result = await self.cursor.execute(operation, self._parameters)
         result = await result.fetchall()
         for row in result:
-            yield row
+            await yield_(row)
 
     def _stmt_parameters(self):
         stmt = ''
