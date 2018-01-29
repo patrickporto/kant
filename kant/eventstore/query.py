@@ -2,14 +2,18 @@ from kant.events.models import EventModel
 
 
 class Query:
-    def __init__(self):
+    def __init__(self, cursor):
+        self.cursor = cursor
         self._where = []
         self._parameters = {}
 
-    def __call__(self):
+    async def __aiter__(self):
         operation = 'SELECT * FROM event_store'
         operation += self._stmt_parameters()
-        return (operation, self._parameters)
+        result = await self.cursor.execute(operation, self._parameters)
+        result = await result.fetchall()
+        for row in result:
+            yield row
 
     def _stmt_parameters(self):
         stmt = ''
