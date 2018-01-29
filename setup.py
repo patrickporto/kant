@@ -11,13 +11,13 @@ with open(path.join(BASE_DIR, 'README.md')) as f:
 
 setup(
     name='kant',
-    version='1.0.4',
+    version='1.1.0',
     description='The CQRS and Event Sourcing framework for Python',
     url='http://github.com/patrickporto/kant',
     author='Patrick Porto',
     author_email='patrick.s.porto@gmail.com',
     license='MIT',
-    packages=['kant', 'kant.datamapper', 'kant.events', 'kant.eventstore'],
+    packages=['kant', 'kant.aggregates', 'kant.datamapper', 'kant.events', 'kant.eventstore'],
     install_requires=[
         'python-dateutil',
         'inflection',
