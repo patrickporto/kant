@@ -1,5 +1,5 @@
 from os import path
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 BASE_DIR = path.dirname(__file__)
@@ -17,7 +17,7 @@ setup(
     author='Patrick Porto',
     author_email='patrick.s.porto@gmail.com',
     license='MIT',
-    packages=['kant', 'kant.aggregates', 'kant.datamapper', 'kant.events', 'kant.eventstore'],
+    packages=find_packages(),
     install_requires=[
         'python-dateutil',
         'inflection',
