@@ -6,10 +6,15 @@ from kant.eventstore.exceptions import StreamExists, DependencyDoesNotExist
 
 
 class EventStream:
-    def __init__(self, events=[]):
+    def __init__(self, events=None):
         self.initial_version = -1
         self.current_version = -1
         self._events = set()
+        if events is None:
+            events = []
+        else:
+            events = list(events)
+
         for event in events:
             self.initial_version += 1
             self.add(event)
