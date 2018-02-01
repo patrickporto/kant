@@ -11,7 +11,7 @@ A CQRS and Event Sourcing framework, safe for humans.
 ## Feature Support
 
 * Event Store
-* Optimistic concurrency control
+* Pessimistic concurrency control
 * JSON serialization
 * Snapshots **[IN PROGRESS]**
 * Projections **[IN PROGRESS]**
