@@ -1,9 +1,9 @@
 from collections import namedtuple
-from copy import deepcopy
 from asyncio_extras.contextmanager import async_contextmanager
 from async_generator import yield_
 import aiopg
-from ..exceptions import ObjectDoesNotExist, IntegrityError, StreamDoesNotExist
+from ..exceptions import (ObjectDoesNotExist, IntegrityError,
+                          StreamDoesNotExist, VersionError)
 from ..stream import EventStream
 
 
@@ -40,7 +40,8 @@ class EventStoreConnection:
             id varchar(255),
             data jsonb NOT NULL,
             created_at timestamp NOT NULL,
-            updated_at timestamp NOT NULL
+            updated_at timestamp NOT NULL,
+            version bigserial NOT NULL
         )
         """.format(keyspace=keyspace)
         async with self.pool.cursor() as cursor:
@@ -54,7 +55,7 @@ class EventStoreConnection:
             await cursor.execute(stmt)
 
     @async_contextmanager
-    async def open(self, name, mode='r', skip_version=0):
+    async def open(self, name, mode='r', skip_version=0, optimistic=True):
         """
         Open stream and return a corresponding EventStream. If the stream cannot be opened, an ObjectDoesNotExist is raised.
         """
@@ -68,8 +69,9 @@ class EventStoreConnection:
                 stmt_select = """
                 SELECT {keyspace}.data
                 FROM {keyspace} WHERE {keyspace}.id = %(id)s AND CAST(data ? '$version' AS INTEGER) >= %(version)s
-                FOR UPDATE
                 """.format(keyspace=keyspace)
+                if not optimistic:
+                    stmt_select += " FOR UPDATE"
                 await cursor.execute(stmt_select, {
                     'id': str(stream),
                     'version': skip_version,
@@ -77,30 +79,31 @@ class EventStoreConnection:
                 event_store = await cursor.fetchone()
                 eventstream = self._get_eventstream(stream, event_store, mode)
 
-                old_eventstream = deepcopy(eventstream)
-
                 await yield_(eventstream)
 
                 if not eventstream.exists():
                     stmt_insert = """
-                    INSERT INTO {keyspace} (id, data, created_at, updated_at)
-                    VALUES (%(id)s, %(data)s, NOW(), NOW())
+                    INSERT INTO {keyspace} (id, version, data, created_at, updated_at)
+                    VALUES (%(id)s, %(version)s, %(data)s, NOW(), NOW())
                     """.format(keyspace=keyspace)
                     await cursor.execute(stmt_insert, {
                         'id': str(stream),
+                        'version': eventstream.current_version,
                         'data': eventstream.decode(),
                     })
-                elif eventstream > old_eventstream:
-                    message = "The version is {current_version}, but the expected is {expected_version}".format(
-                        current_version=eventstream.initial_version,
-                        expected_version=events.initial_version,
-                    )
-                    raise VersionError(message)
-                elif eventstream.current_version > old_eventstream.initial_version:
+                elif eventstream.current_version > eventstream.initial_version:
                     stmt_update = """
-                    UPDATE {keyspace} SET data=%(data)s, updated_at=NOW() WHERE id = %(id)s;
+                    UPDATE {keyspace} SET data=%(data)s, updated_at=NOW(), version=%(current_version)s
+                    WHERE id = %(id)s AND version = %(initial_version)s;
                     """.format(keyspace=keyspace)
                     await cursor.execute(stmt_update, {
                         'id': str(stream),
+                        'initial_version': eventstream.initial_version,
+                        'current_version': eventstream.current_version,
                         'data': eventstream.decode(),
                     })
+                    if cursor.rowcount < 1:
+                        message = "The expected version is {expected_version}".format(
+                            expected_version=eventstream.initial_version,
+                        )
+                        raise VersionError(message)

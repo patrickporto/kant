@@ -112,3 +112,34 @@ async def test_get_should_raise_exception_when_not_found(dbsession, connection):
     with pytest.raises(ObjectDoesNotExist):
         async with connection.open('event_store/{}'.format(aggregate_id), 'r') as eventstream:
             pass
+
+
+@pytest.mark.asyncio
+async def test_save_should_raise_version_error_when_optimistic(dbsession, connection):
+    # arrange
+    aggregate_id = 'f2283f9d-9ed2-4385-a614-53805725cbac',
+    events_base = EventStream([
+        BankAccountCreated(
+            id=aggregate_id,
+            owner='John Doe'
+        )
+    ])
+    events_1 = EventStream([
+        DepositPerformed(
+            amount=20
+        )
+    ])
+    events_2 = EventStream([
+        WithdrawalPerformed(
+            amount=20
+        )
+    ])
+    async with connection.open('event_store/{}'.format(aggregate_id), 'w') as eventstream:
+        eventstream += events_base
+    # act and assert
+    ctx_1 = connection.open('event_store/{}'.format(aggregate_id), 'r', optimistic=True)
+    ctx_2 = connection.open('event_store/{}'.format(aggregate_id), 'r', optimistic=True)
+    with pytest.raises(VersionError):
+        async with ctx_1 as eventstream_1, ctx_2 as eventstream_2:
+            eventstream_1 += events_1
+            eventstream_2 += events_2
