@@ -17,7 +17,7 @@ setup(
     author='Patrick Porto',
     author_email='patrick.s.porto@gmail.com',
     license='MIT',
-    packages=find_packages(),
+    packages=find_packages(exclude=['conftest.py']),
     install_requires=[
         'python-dateutil',
         'inflection',
