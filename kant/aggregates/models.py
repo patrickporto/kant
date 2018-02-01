@@ -49,3 +49,9 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
     @property
     def version(self):
         return self._all_events.initial_version
+
+    @classmethod
+    def from_stream(cls, stream):
+        self = cls()
+        self.fetch_events(stream)
+        return self
