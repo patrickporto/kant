@@ -1,5 +1,5 @@
 import pytest
-from kant.aggregates import Aggregate, models
+from kant import aggregates
 from kant.eventstore import EventStream
 from kant.events import models
 
@@ -22,10 +22,10 @@ class WithdrawalPerformed(models.EventModel):
 @pytest.mark.asyncio
 async def test_aggregate_should_apply_one_event(dbsession):
     # arrange
-    class BankAccount(Aggregate):
-        id = models.IntegerField()
-        owner = models.CharField()
-        balance = models.IntegerField()
+    class BankAccount(aggregates.Aggregate):
+        id = aggregates.IntegerField()
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
 
         def apply_bank_account_created(self, event):
             self.id = event.id
@@ -50,10 +50,10 @@ async def test_aggregate_should_apply_one_event(dbsession):
 @pytest.mark.asyncio
 async def test_aggregate_should_apply_many_events(dbsession):
     # arrange
-    class BankAccount(Aggregate):
-        id = models.IntegerField()
-        owner = models.CharField()
-        balance = models.IntegerField()
+    class BankAccount(aggregates.Aggregate):
+        id = aggregates.IntegerField()
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
 
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -85,10 +85,10 @@ async def test_aggregate_should_apply_many_events(dbsession):
 @pytest.mark.asyncio
 async def test_aggregate_should_apply_event_list(dbsession):
     # arrange
-    class BankAccount(Aggregate):
-        id = models.IntegerField()
-        owner = models.CharField()
-        balance = models.IntegerField()
+    class BankAccount(aggregates.Aggregate):
+        id = aggregates.IntegerField()
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
 
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -120,10 +120,10 @@ async def test_aggregate_should_apply_event_list(dbsession):
 async def test_aggregate_should_load_events(dbsession):
     # arrange
 
-    class BankAccount(Aggregate):
-        id = models.IntegerField()
-        owner = models.CharField()
-        balance = models.IntegerField()
+    class BankAccount(aggregates.Aggregate):
+        id = aggregates.IntegerField()
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
 
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -163,10 +163,10 @@ async def test_aggregate_should_load_events(dbsession):
 async def test_aggregate_should_apply_event_after_load_events(dbsession):
     # arrange
 
-    class BankAccount(Aggregate):
-        id = models.IntegerField()
-        owner = models.CharField()
-        balance = models.IntegerField()
+    class BankAccount(aggregates.Aggregate):
+        id = aggregates.IntegerField()
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
 
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -202,10 +202,10 @@ async def test_aggregate_should_apply_event_after_load_events(dbsession):
 async def test_aggregate_should_be_created_from_events(dbsession):
     # arrange
 
-    class BankAccount(Aggregate):
-        id = models.IntegerField()
-        owner = models.CharField()
-        balance = models.IntegerField()
+    class BankAccount(aggregates.Aggregate):
+        id = aggregates.IntegerField()
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
 
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -240,10 +240,10 @@ async def test_aggregate_should_be_created_from_events(dbsession):
 async def test_aggregate_should_return_new_events(dbsession):
     # arrange
 
-    class BankAccount(Aggregate):
-        id = models.IntegerField()
-        owner = models.CharField()
-        balance = models.IntegerField()
+    class BankAccount(aggregates.Aggregate):
+        id = aggregates.IntegerField()
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
 
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -278,10 +278,10 @@ async def test_aggregate_should_return_new_events(dbsession):
 @pytest.mark.asyncio
 async def test_aggregate_should_return_all_events(dbsession):
     # arrange
-    class BankAccount(Aggregate):
-        id = models.IntegerField()
-        owner = models.CharField()
-        balance = models.IntegerField()
+    class BankAccount(aggregates.Aggregate):
+        id = aggregates.IntegerField()
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
 
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -318,10 +318,10 @@ async def test_aggregate_should_return_all_events(dbsession):
 @pytest.mark.asyncio
 async def test_aggregate_should_return_stored_events(dbsession):
     # arrange
-    class BankAccount(Aggregate):
-        id = models.IntegerField()
-        owner = models.CharField()
-        balance = models.IntegerField()
+    class BankAccount(aggregates.Aggregate):
+        id = aggregates.IntegerField()
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
 
         def apply_bank_account_created(self, event):
             self.id = event.get('id')
@@ -356,10 +356,10 @@ async def test_aggregate_should_return_stored_events(dbsession):
 @pytest.mark.asyncio
 async def test_aggregate_should_decode_to_json(dbsession):
     # arrange
-    class BankAccount(Aggregate):
-        id = models.IntegerField()
-        owner = models.CharField()
-        balance = models.IntegerField()
+    class BankAccount(aggregates.Aggregate):
+        id = aggregates.IntegerField()
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
 
         def apply_bank_account_created(self, event):
             self.id = event.id

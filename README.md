@@ -36,12 +36,12 @@ class DepositPerformed(models.EventModel):
 Create aggregate to apply events
 
 ```python
-from kant.aggregates import models
+from kant import aggregates
 
-class BankAccount(models.Aggregate):
-    id = models.CUIDField()
-    owner = models.CharField()
-    balance = models.DecimalField()
+class BankAccount(aggregates.Aggregate):
+    id = aggregates.CUIDField()
+    owner = aggregates.CharField()
+    balance = aggregates.DecimalField()
 
     def apply_bank_account_created(self, event):
         self.id = event.id
