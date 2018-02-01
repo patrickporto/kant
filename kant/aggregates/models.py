@@ -36,11 +36,16 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
         method = getattr(self, method_name)
         method(event)
 
-    def dispatch(self, event, flush=True):
-        self.apply(event)
-        if flush:
-            self._events.add(event)
-            self._all_events.add(event)
+    def dispatch(self, events, flush=True):
+        if isinstance(events, list):
+            received_events = list(events)
+        else:
+            received_events = [events]
+        for event in received_events:
+            self.apply(event)
+            if flush:
+                self._events.add(event)
+                self._all_events.add(event)
 
     @property
     def current_version(self):

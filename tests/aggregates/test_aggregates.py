@@ -83,6 +83,40 @@ async def test_aggregate_should_apply_many_events(dbsession):
 
 
 @pytest.mark.asyncio
+async def test_aggregate_should_apply_event_list(dbsession):
+    # arrange
+    class BankAccount(Aggregate):
+        id = models.IntegerField()
+        owner = models.CharField()
+        balance = models.IntegerField()
+
+        def apply_bank_account_created(self, event):
+            self.id = event.get('id')
+            self.owner = event.get('owner')
+            self.balance = 0
+
+        def apply_deposit_performed(self, event):
+            self.balance += event.get('amount')
+
+    bank_account_created = BankAccountCreated(
+        id=123,
+        owner='John Doe',
+    )
+    deposit_performed = DepositPerformed(
+        amount=20,
+    )
+    # act
+    bank_account = BankAccount()
+    bank_account.dispatch([bank_account_created, deposit_performed])
+    # assert
+    assert bank_account.version == -1
+    assert bank_account.current_version == 1
+    assert bank_account.id == 123
+    assert bank_account.owner == 'John Doe'
+    assert bank_account.balance == 20
+
+
+@pytest.mark.asyncio
 async def test_aggregate_should_load_events(dbsession):
     # arrange
 
