@@ -89,7 +89,7 @@ class EventStoreConnection:
                     await cursor.execute(stmt_insert, {
                         'id': str(stream),
                         'version': eventstream.current_version,
-                        'data': eventstream.decode(),
+                        'data': eventstream.json(),
                     })
                 elif eventstream.current_version > eventstream.initial_version:
                     stmt_update = """
@@ -100,7 +100,7 @@ class EventStoreConnection:
                         'id': str(stream),
                         'initial_version': eventstream.initial_version,
                         'current_version': eventstream.current_version,
-                        'data': eventstream.decode(),
+                        'data': eventstream.json(),
                     })
                     if cursor.rowcount < 1:
                         message = "The expected version is {expected_version}".format(

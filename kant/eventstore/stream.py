@@ -1,7 +1,6 @@
 from operator import attrgetter
 import json
 from kant.events.models import EventModel
-from kant.events.serializers import EventModelEncoder
 from kant.eventstore.exceptions import StreamExists, DependencyDoesNotExist
 
 
@@ -77,7 +76,10 @@ class EventStream:
             self._events.add(event)
 
     def decode(self):
-        return json.dumps(list(self._events), cls=EventModelEncoder)
+        return [event.decode() for event in self._events]
+
+    def json(self):
+        return json.dumps(self.decode(), sort_keys=True)
 
     @classmethod
     def make(self, obj):
