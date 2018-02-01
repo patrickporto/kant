@@ -17,5 +17,17 @@ class DependencyDoesNotExist(VersionError):
         super().__init__(message, *args, **kwargs)
 
 
-class ObjectDoesNotExist(Exception):
+class DatabaseError(Exception):
+    pass
+
+
+class ObjectDoesNotExist(DatabaseError):
+    pass
+
+
+class IntegrityError(DatabaseError):
+    pass
+
+
+class StreamDoesNotExist(DatabaseError):
     pass

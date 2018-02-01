@@ -23,6 +23,7 @@ setup(
         'inflection',
         'cuid.py',
         'async_generator',
+        'asyncio_extras',
     ],
     long_description=long_description,
     setup_requires=[

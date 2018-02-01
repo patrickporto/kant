@@ -66,6 +66,9 @@ class EventStream:
         self._valid_dependencies(event)
         return event
 
+    def exists(self):
+        return self.initial_version != -1
+
     def add(self, event):
         if event not in self._events:
             event = self._conflict_resolution(event)
