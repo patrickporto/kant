@@ -6,13 +6,17 @@
 [![Supported implementations](https://img.shields.io/pypi/implementation/kant.svg)](https://pypi.python.org/pypi/kant)
 
 
-A CQRS and Event Sourcing framework for Python 3.
+A CQRS and Event Sourcing framework, safe for humans.
 
-## Installing
+## Feature Support
 
-```bash
-pip install kant
-```
+* Event Store
+* Optimistic concurrency control
+* JSON serialization
+* Snapshots **[IN PROGRESS]**
+* Projections **[IN PROGRESS]**
+
+Kant officially supports Python 3.5-3.6.
 
 ## Getting started
 
@@ -32,24 +36,31 @@ class DepositPerformed(models.EventModel):
 Create aggregate to apply events
 
 ```python
-from kant.aggregates import Aggregate
+from kant.aggregates import models
 
-class BankAccount(Aggregate):
+class BankAccount(models.Aggregate):
+    id = models.CUIDField()
+    owner = models.CharField()
+    balance = models.DecimalField()
+
     def apply_bank_account_created(self, event):
-        self.id = event.get('id')
-        self.owner = event.get('owner')
+        self.id = event.id
+        self.owner = event.owner
         self.balance = 0
 
     def apply_deposit_performed(self, event):
-        self.balance += event.get('amount')
+        self.balance += event.amount
 ```
 
-Now, manage events by EventRepository
+Now, save the events
 
 ```python
-# database connection
-import aiopg
-conn = await aiopg.connect(user='user', password='user', database='database')
+from kant.eventstore.connection import connect
+
+conn = await connect(user='user', password='user', database='database')
+
+# create event store for bank_account
+conn.create_keyspace('bank_account')
 
 # create events
 bank_account_created = BankAccountCreated(
@@ -61,33 +72,28 @@ deposit_performed = DepositPerformed(
 )
 
 bank_account = BankAccount()
-# apply event BankAccountCreated { id: 123, owner: 'John Doe' }
-bank_account.dispatch(bank_account_created)
-# apply event DepositPerformed { amount: 20 }
-bank_account.dispatch(deposit_performed)
+bank_account.dispatch([bank_account_created, deposit_performed])
 
-async with conn as cursor:
-        event_store_repository = EventStoreRepository(cursor)
-        event_store_repository.save(
-            aggregate_id=bank_account.id,
-            events=bank_account.get_events(),
-        )
-        # get aggregate by id
-        stored_events = await event_store_repository.get(123)
-        stored_bank_account = BankAccount()
-        # apply stored events in stored_bank_account
-        stored_bank_account.fetch_events(stored_events)
+# insert the events into EventStore
+async with conn.open('bank_account/{}'.format(bank_account.id), 'w') as eventstream:
+    eventstream += bank_account.get_events()
 ```
 
-## Features
+Load the events from EventStore
+```python
+async with conn.open('bank_account/123', 'w') as eventstream:
+    bank_account = BankAccount.from_stream(eventstream)
+```
 
-* Optimistic Concurrency
+## Installing
+To install Kant, simply use [pipenv](pipenv.org) (or pip)
+
+```bash
+$ pipenv install kant
+```
+
 
 
 ## Contributing
 
 Please, read the contribute guide [CONTRIBUTING](CONTRIBUTING.md).
-
-## License
-
-**MIT**
