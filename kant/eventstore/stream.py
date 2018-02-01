@@ -1,7 +1,7 @@
 from operator import attrgetter
 import json
-from kant.events.models import EventModel
-from kant.eventstore.exceptions import StreamExists, DependencyDoesNotExist
+from kant.events import EventModel
+from .exceptions import StreamExists, DependencyDoesNotExist
 
 
 class EventStream:

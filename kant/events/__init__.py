@@ -1,1 +1,1 @@
-from .models import *  # NOQA
+from .base import *  # NOQA

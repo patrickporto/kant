@@ -6,27 +6,27 @@ from kant.aggregates import Aggregate
 from kant.exceptions import ObjectDoesNotExist, VersionError
 from kant.eventstore.connection import connect
 from kant.eventstore.stream import EventStream
-from kant.events import models
+from kant import events
 
 
-class BankAccountCreated(models.EventModel):
+class BankAccountCreated(events.EventModel):
     __empty_stream__ = True
 
-    id = models.CUIDField(primary_key=True)
-    owner = models.CharField()
+    id = events.CUIDField(primary_key=True)
+    owner = events.CharField()
 
 
-class DepositPerformed(models.EventModel):
-    amount = models.DecimalField()
+class DepositPerformed(events.EventModel):
+    amount = events.DecimalField()
 
 
-class WithdrawalPerformed(models.EventModel):
-    amount = models.DecimalField()
+class WithdrawalPerformed(events.EventModel):
+    amount = events.DecimalField()
 
 
-class MyObjectCreated(models.EventModel):
-    id = models.CUIDField(primary_key=True)
-    owner = models.CharField()
+class MyObjectCreated(events.EventModel):
+    id = events.CUIDField(primary_key=True)
+    owner = events.CharField()
 
 
 @pytest.fixture

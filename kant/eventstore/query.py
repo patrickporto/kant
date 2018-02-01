@@ -1,5 +1,5 @@
 from async_generator import yield_, async_generator
-from kant.events.models import EventModel
+from kant.events import EventModel
 
 
 class Query:

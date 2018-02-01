@@ -1,8 +1,8 @@
 from abc import ABCMeta
-from kant.events.exceptions import EventDoesNotExist
 from kant.datamapper.base import ModelMeta, FieldMapping
 from kant.datamapper.fields import *  # NOQA
 from kant.datamapper.models import *  # NOQA
+from .exceptions import EventDoesNotExist
 
 
 class EventModel(FieldMapping, metaclass=ModelMeta):

@@ -1,22 +1,22 @@
 import pytest
 from kant import aggregates
 from kant.eventstore import EventStream
-from kant.events import models
+from kant import events
 
 
-class BankAccountCreated(models.EventModel):
+class BankAccountCreated(events.EventModel):
     __empty_stream__ = True
 
-    id = models.CUIDField(primary_key=True)
-    owner = models.CharField()
+    id = events.CUIDField(primary_key=True)
+    owner = events.CharField()
 
 
-class DepositPerformed(models.EventModel):
-    amount = models.DecimalField()
+class DepositPerformed(events.EventModel):
+    amount = events.DecimalField()
 
 
-class WithdrawalPerformed(models.EventModel):
-    amount = models.DecimalField()
+class WithdrawalPerformed(events.EventModel):
+    amount = events.DecimalField()
 
 
 @pytest.mark.asyncio

@@ -1,5 +1,5 @@
 import pytest
-from kant.events.models import EventModel, DecimalField
+from kant.events import EventModel, DecimalField
 from kant.exceptions import EventDoesNotExist
 
 

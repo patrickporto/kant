@@ -23,14 +23,14 @@ Kant officially supports Python 3.5-3.6.
 Create declarative events
 
 ```python
-from kant.events import models
+from kant import events
 
-class BankAccountCreated(models.EventModel):
-    id = models.CUIDField(primary_key=True)
-    owner = models.CharField()
+class BankAccountCreated(events.EventModel):
+    id = events.CUIDField(primary_key=True)
+    owner = events.CharField()
 
-class DepositPerformed(models.EventModel):
-    amount = models.DecimalField()
+class DepositPerformed(events.EventModel):
+    amount = events.DecimalField()
 ```
 
 Create aggregate to apply events

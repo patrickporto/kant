@@ -1,15 +1,15 @@
 from datetime import datetime
 import json
 import pytest
-from kant.events import models
+from kant import events
 
 
-class FoundAdded(models.EventModel):
-    amount = models.DecimalField()
+class FoundAdded(events.EventModel):
+    amount = events.DecimalField()
 
 
-class AccountSchemaModel(models.SchemaModel):
-    balance = models.DecimalField()
+class AccountSchemaModel(events.SchemaModel):
+    balance = events.DecimalField()
 
 
 @pytest.fixture(autouse=True)

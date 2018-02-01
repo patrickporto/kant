@@ -1,28 +1,28 @@
 import pytest
 from kant.eventstore.stream import EventStream
 from kant.eventstore.exceptions import StreamExists, DependencyDoesNotExist
-from kant.events import models
+from kant import events
 
 
-class BankAccountCreated(models.EventModel):
+class BankAccountCreated(events.EventModel):
     __empty_stream__ = True
 
-    id = models.CUIDField(primary_key=True)
-    owner = models.CharField()
+    id = events.CUIDField(primary_key=True)
+    owner = events.CharField()
 
 
-class DepositPerformed(models.EventModel):
-    amount = models.DecimalField()
+class DepositPerformed(events.EventModel):
+    amount = events.DecimalField()
 
 
-class WithdrawalPerformed(models.EventModel):
-    amount = models.DecimalField()
+class WithdrawalPerformed(events.EventModel):
+    amount = events.DecimalField()
 
 
-class OwnerChanged(models.EventModel):
+class OwnerChanged(events.EventModel):
     __dependencies__ = ['BankAccountCreated']
 
-    new_owner = models.CharField()
+    new_owner = events.CharField()
 
 
 @pytest.mark.asyncio
