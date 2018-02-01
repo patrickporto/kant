@@ -24,6 +24,7 @@ setup(
         'cuid.py',
         'async_generator',
         'asyncio_extras',
+        'aiopg',
     ],
     long_description=long_description,
     setup_requires=[
@@ -34,7 +35,6 @@ setup(
         'pytest-pycodestyle',
         'pytest-cov',
         'pytest-asyncio',
-        'aiopg',
     ],
     zip_safe=False,
     classifiers=[
