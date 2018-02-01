@@ -8,3 +8,4 @@ __pycache__
 .cache
 build
 /.mypy_cache/
+/.pytest_cache/
