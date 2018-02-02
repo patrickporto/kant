@@ -35,6 +35,7 @@ setup(
         'pytest-pycodestyle',
         'pytest-cov',
         'pytest-asyncio',
+        'sqlalchemy',
     ],
     zip_safe=False,
     classifiers=[

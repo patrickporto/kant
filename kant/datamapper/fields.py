@@ -6,7 +6,8 @@ from cuid import cuid
 
 
 class Field(metaclass=ABCMeta):
-    def __init__(self, default=None, json_column=None, *args, **kwargs):
+    def __init__(self, default=None, json_column=None, primary_key=False, *args, **kwargs):
+        self.primary_key = primary_key
         self.default = default
         self.json_column = json_column
 
@@ -23,8 +24,7 @@ class Field(metaclass=ABCMeta):
 
 
 class CUIDField(Field):
-    def __init__(self, primary_key=False, *args, **kwargs):
-        self.primary_key = primary_key
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.primary_key:
             self.default = cuid
