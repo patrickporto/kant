@@ -106,11 +106,11 @@ class FieldMapping(MutableMapping):
         return json.dumps(self.decode(), sort_keys=True)
 
     def primary_keys(self):
-        primary_keys = []
+        primary_keys = {}
         for name, value in self._values.items():
             field = self.concrete_fields[name]
             field_name = field.json_column or name
             field_value = field.encode(value)
             if field.primary_key:
-                primary_keys.append(field_value)
-        return tuple(primary_keys)
+                primary_keys[field_name] = field_value
+        return primary_keys
