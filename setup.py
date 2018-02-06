@@ -37,6 +37,9 @@ setup(
         'pytest-asyncio',
         'sqlalchemy',
     ],
+    extras_require={
+        'SQLAlchemy-Projections': ['sqlalchemy'],
+    },
     zip_safe=False,
     classifiers=[
         #   3 - Alpha
