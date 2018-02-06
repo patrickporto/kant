@@ -6,8 +6,6 @@ from kant.datamapper.fields import *  # NOQA
 
 
 class Aggregate(FieldMapping, metaclass=ModelMeta):
-    _observers = set()
-
     def __init__(self):
         super().__init__()
         self._all_events = EventStream()
@@ -37,8 +35,6 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
         method_name = 'apply_{0}'.format(event_name)
         method = getattr(self, method_name)
         method(event)
-        for observer in self._observers:
-            observer(self, event)
 
     def dispatch(self, events, flush=True):
         if isinstance(events, list):
@@ -64,7 +60,3 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
         self = cls()
         self.fetch_events(stream)
         return self
-
-    @classmethod
-    def subscribe(cls, observer):
-        cls._observers.add(observer)

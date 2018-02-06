@@ -99,9 +99,11 @@ class FieldMapping(MutableMapping):
             field_value = self.concrete_fields[name].encode(value)
             yield (field_name, field_value)
 
+    def decode(self):
+        return {key: value for key, value in self.serializeditems()}
+
     def json(self):
-        data = {key: value for key, value in self.serializeditems()}
-        return json.dumps(data, sort_keys=True)
+        return json.dumps(self.decode(), sort_keys=True)
 
     def primary_keys(self):
         primary_keys = []

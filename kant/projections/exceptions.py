@@ -1,0 +1,2 @@
+class ProjectionError:
+    pass

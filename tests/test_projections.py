@@ -4,7 +4,8 @@ import sqlalchemy as sa
 from kant.eventstore import EventStream
 from kant import aggregates, events
 from kant.eventstore.connection import connect
-from kant.projections.sa import Projection
+from kant import projections
+from kant.projections.sa import SQLAlchemyProjectionAdapter
 
 
 metadata = sa.MetaData()
@@ -37,7 +38,7 @@ class BankAccount(aggregates.Aggregate):
 
 
 @pytest.fixture
-async def connection(dbsession):
+async def eventstore(dbsession):
     eventstore = await connect(
         pool=dbsession,
     )
@@ -46,41 +47,44 @@ async def connection(dbsession):
 
 
 @pytest.mark.asyncio
-async def test_projection_should_create_projection(saconnection):
+async def test_projection_should_create_projection(saconnection, eventstore):
     # arrange
     statement = sa.Table('statement', metadata,  # NOQA
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('owner', sa.String(255)),
         sa.Column('balance', sa.Integer),
     )
-    await saconnection.execute(DropTable(statement))
     await saconnection.execute(CreateTable(statement))
 
-    class Statement(Projection):
-        __aggregate__ = BankAccount
+    class Statement(projections.Projection):
+        __keyspace__ = 'event_store'
+        id = projections.IntegerField()
+        owner = projections.CharField()
+        balance = projections.IntegerField()
 
-        def when_bank_account_created(self, state, event):
-            state.id = event.id
-            state.owner = event.owner
-            state.balance = 0
-            return state
+        def when_bank_account_created(self, event):
+            self.id = event.id
+            self.owner = event.owner
+            self.balance = 0
 
         def when_deposit_performed(self, state, event):
-            state.balance += event.amount
-            return state
+            self.balance += event.amount
 
         def when_withdrawal_performed(self, state, event):
-            state.balance -= event.amount
-            return state
+            self.balance -= event.amount
 
     # act
-    bind_projection(statement, saconnection)(Statement)
+    projection_manager = SQLAlchemyProjectionAdapter(saconnection)
+    projection_manager.register(statement, Statement)
+    eventstore.projections.bind(projection_manager)
 
     bank_account = BankAccount()
     bank_account.dispatch(BankAccountCreated(
         id=123,
         owner='John Doe',
     ))
+    async with eventstore.open('event_store/{}'.format(bank_account.id), 'w') as eventstream:
+        eventstream += bank_account.get_events()
     # assert
     result = await saconnection.execute(statement.select())
     result = list(result)

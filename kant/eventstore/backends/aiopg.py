@@ -7,7 +7,25 @@ from ..exceptions import (ObjectDoesNotExist, IntegrityError,
 from ..stream import EventStream
 
 
+class ProjectionManager:
+    def __init__(self):
+        self._adapters = set()
+
+    def bind(self, adapter):
+        self._adapters.add(adapter)
+
+    async def notify_create(self, *args, **kwargs):
+        for adapter in self._adapters:
+            await adapter.handle_create(*args, **kwargs)
+
+    async def notify_update(self, *args, **kwargs):
+        for adapter in self._adapters:
+            await adapter.handle_update(*args, **kwargs)
+
+
 class EventStoreConnection:
+    def __init__(self):
+        self.projections = ProjectionManager()
 
     @classmethod
     async def create(cls, settings):
@@ -91,6 +109,7 @@ class EventStoreConnection:
                         'version': eventstream.current_version,
                         'data': eventstream.json(),
                     })
+                    await self.projections.notify_create(keyspace, stream, eventstream)
                 elif eventstream.current_version > eventstream.initial_version:
                     stmt_update = """
                     UPDATE {keyspace} SET data=%(data)s, updated_at=NOW(), version=%(current_version)s
@@ -107,3 +126,4 @@ class EventStoreConnection:
                             expected_version=eventstream.initial_version,
                         )
                         raise VersionError(message)
+                    await self.projections.notify_update(keyspace, stream, eventstream)
