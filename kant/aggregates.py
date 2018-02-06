@@ -3,6 +3,7 @@ from inflection import underscore
 from kant.eventstore.stream import EventStream
 from kant.datamapper.base import ModelMeta, FieldMapping
 from kant.datamapper.fields import *  # NOQA
+from .exceptions import CommandError
 
 
 class Aggregate(FieldMapping, metaclass=ModelMeta):
@@ -33,8 +34,12 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
     def apply(self, event):
         event_name = underscore(event.__class__.__name__)
         method_name = 'apply_{0}'.format(event_name)
-        method = getattr(self, method_name)
-        method(event)
+        try:
+            method = getattr(self, method_name)
+            method(event)
+        except AttributeError:
+            msg = "The command for '{}' is not defined".format(event.__class__.__name__)
+            raise CommandError(msg)
 
     def dispatch(self, events, flush=True):
         if isinstance(events, list):

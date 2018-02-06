@@ -32,10 +32,6 @@ class MyObjectCreated(events.EventModel):
 @pytest.fixture
 async def connection(dbsession):
     eventstore = await connect(
-        user=environ.get('DATABASE_USER'),
-        password=environ.get('DATABASE_PASSWORD'),
-        database=environ.get('DATABASE_DATABASE'),
-        host=environ.get('DATABASE_HOST'),
         pool=dbsession,
     )
     await eventstore.create_keyspace('event_store')
