@@ -1,2 +1,2 @@
-class ProjectionError:
+class ProjectionError(Exception):
     pass
