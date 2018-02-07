@@ -21,10 +21,6 @@ class DatabaseError(Exception):
     pass
 
 
-class ObjectDoesNotExist(DatabaseError):
-    pass
-
-
 class IntegrityError(DatabaseError):
     pass
 

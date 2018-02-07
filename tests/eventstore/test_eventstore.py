@@ -1,9 +1,11 @@
 from copy import deepcopy
+from operator import attrgetter
 from os import environ
+from async_generator import yield_, async_generator
 import json
 import pytest
 from kant.aggregates import Aggregate
-from kant.exceptions import ObjectDoesNotExist, VersionError
+from kant.exceptions import StreamDoesNotExist, VersionError
 from kant.eventstore.connection import connect
 from kant.eventstore.stream import EventStream
 from kant import events
@@ -30,12 +32,14 @@ class MyObjectCreated(events.EventModel):
 
 
 @pytest.fixture
+@async_generator
 async def connection(dbsession):
     eventstore = await connect(
         pool=dbsession,
     )
     await eventstore.create_keyspace('event_store')
-    return eventstore
+    await yield_(eventstore)
+    await eventstore.drop_keyspace('event_store')
 
 
 @pytest.mark.asyncio
@@ -49,8 +53,10 @@ async def test_save_should_create_event_store(dbsession, connection):
         )
     ])
     # act
-    async with connection.open('event_store/{}'.format(aggregate_id), 'w') as eventstream:
-        eventstream += events
+    async with connection.open('event_store') as eventstore:
+        await eventstore.append_to_stream(aggregate_id, events)
+        result = await eventstore.get_stream(aggregate_id)
+
     # assert
     async with dbsession.cursor() as cursor:
         stmt = """
@@ -71,7 +77,7 @@ async def test_save_should_create_event_store(dbsession, connection):
 
 
 @pytest.mark.asyncio
-async def test_get_should_return_events(dbsession, connection):
+async def test_eventstore_should_fetch_one_stream(dbsession, connection):
     # arrange
     stmt = """
     INSERT INTO event_store (id, data, created_at, updated_at)
@@ -90,52 +96,113 @@ async def test_get_should_return_events(dbsession, connection):
             }]),
         })
     # act
-    async with connection.open('event_store/{}'.format(aggregate_id), 'r') as eventstream:
-        stored_events = list(eventstream)
+    async with connection.open('event_store') as eventstore:
+        stored_events = await eventstore.get_stream(aggregate_id)
     # assert
     assert len(stored_events) == 1
-    assert isinstance(stored_events[0], MyObjectCreated)
-    assert stored_events[0].version == 0
-    assert stored_events[0].id == aggregate_id
-    assert stored_events[0].owner == 'John Doe'
+    event = list(stored_events)[0]
+    assert isinstance(event, MyObjectCreated)
+    assert event.version == 0
+    assert event.id == aggregate_id
+    assert event.owner == 'John Doe'
 
 
 @pytest.mark.asyncio
-async def test_get_should_raise_exception_when_not_found(dbsession, connection):
+async def test_eventstore_should_fetch_all_streams(dbsession, connection):
+    # arrange
+    stmt = """
+    INSERT INTO event_store (id, data, created_at, updated_at)
+    VALUES (%(id)s, %(data)s, NOW(), NOW())
+    """
+    aggregate1_id = '1'
+    aggregate2_id = '2'
+    # act
+    async with dbsession.cursor() as cursor:
+        await cursor.execute(stmt, {
+            'id': aggregate1_id,
+            'data': json.dumps([{
+                '$type': 'BankAccountCreated',
+                '$version': 0,
+                'id': aggregate1_id,
+                'owner': 'John Doe',
+            }]),
+        })
+        await cursor.execute(stmt, {
+            'id': aggregate2_id,
+            'data': json.dumps([
+                {
+                    '$type': 'BankAccountCreated',
+                    '$version': 0,
+                    'id': aggregate2_id,
+                    'owner': 'Tim Clock',
+                },
+                {
+                    '$type': 'DepositPerformed',
+                    '$version': 1,
+                    'amount': 20,
+                },
+            ]),
+        })
+    # act
+    async with connection.open('event_store') as eventstore:
+        stored_eventstreams = []
+        async for stream in eventstore.all_streams():
+            stored_eventstreams.append(stream)
+        stored_eventstreams = sorted(stored_eventstreams, key=attrgetter('current_version'))
+
+    # assert
+    assert len(stored_eventstreams) == 2
+    eventstream_1 = list(stored_eventstreams[0])
+    eventstream_2 = list(stored_eventstreams[1])
+    assert eventstream_1[0].version == 0
+    assert eventstream_1[0].id == aggregate1_id
+    assert eventstream_1[0].owner == 'John Doe'
+    assert eventstream_2[0].version == 0
+    assert eventstream_2[0].id == aggregate2_id
+    assert eventstream_2[0].owner == 'Tim Clock'
+    assert eventstream_2[1].version == 1
+    assert eventstream_2[1].amount == 20
+
+
+@pytest.mark.asyncio
+async def test_get_should_raise_exception_when_not_found(connection):
     # arrange
     aggregate_id = 'f2283f9d-9ed2-4385-a614-53805725cbac',
     # act and assert
-    with pytest.raises(ObjectDoesNotExist):
-        async with connection.open('event_store/{}'.format(aggregate_id), 'r') as eventstream:
-            pass
+    async with connection.open('event_store') as eventstore:
+        with pytest.raises(StreamDoesNotExist):
+            stored_events = await eventstore.get_stream(aggregate_id)
 
 
 @pytest.mark.asyncio
-async def test_save_should_raise_version_error_when_optimistic(dbsession, connection):
+async def test_eventstore_should_raise_version_error(dbsession, connection):
     # arrange
-    aggregate_id = 'f2283f9d-9ed2-4385-a614-53805725cbac',
+    aggregate_id = 'f2283f9d-9ed2-4385-a614-53805725cbac'
     events_base = EventStream([
         BankAccountCreated(
             id=aggregate_id,
             owner='John Doe'
         )
     ])
-    events_1 = EventStream([
+    events = EventStream([
         DepositPerformed(
             amount=20
         )
     ])
-    events_2 = EventStream([
-        WithdrawalPerformed(
-            amount=20
-        )
-    ])
-    async with connection.open('event_store/{}'.format(aggregate_id), 'w') as eventstream:
-        eventstream += events_base
-    # act and assert
-    ctx_1 = connection.open('event_store/{}'.format(aggregate_id), 'r', optimistic=True)
-    ctx_2 = connection.open('event_store/{}'.format(aggregate_id), 'r', optimistic=True)
+    async with connection.open('event_store') as eventstore:
+        await eventstore.append_to_stream(aggregate_id, events_base)
+
+    # act
+    async with dbsession.cursor() as cursor:
+        stmt = """
+        UPDATE event_store SET version=%(version)s
+        WHERE id = %(id)s;
+        """
+        await cursor.execute(stmt, {
+            'id': aggregate_id,
+            'version': 10,
+        })
+    # assert
     with pytest.raises(VersionError):
-        async with ctx_1 as eventstream_1, ctx_2 as eventstream_2:
-            eventstream_1 += events_1
-            eventstream_2 += events_2
+        async with connection.open('event_store') as eventstore:
+            await eventstore.append_to_stream(aggregate_id, events)

@@ -68,6 +68,9 @@ class EventStream:
     def exists(self):
         return self.initial_version != -1
 
+    def clear(self):
+        self._events = set()
+
     def add(self, event):
         if event not in self._events:
             event = self._conflict_resolution(event)

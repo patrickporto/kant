@@ -22,8 +22,9 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
     def get_events(self):
         return self._events
 
-    def clear_events(self):
-        self._events = EventStream()
+    def notify_save(self, new_version):
+        self._events.clear()
+        self._events.initial_version = new_version
 
     def fetch_events(self, events: EventStream):
         self._stored_events = deepcopy(events)

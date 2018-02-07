@@ -1,10 +1,9 @@
 from collections import namedtuple
 from asyncio_extras.contextmanager import async_contextmanager
-from async_generator import yield_
+from async_generator import yield_, async_generator
 import aiopg
 from kant.projections import ProjectionManager
-from ..exceptions import (ObjectDoesNotExist, IntegrityError,
-                          StreamDoesNotExist, VersionError)
+from ..exceptions import (StreamDoesNotExist, VersionError)
 from ..stream import EventStream
 
 
@@ -25,17 +24,6 @@ class EventStoreConnection:
                 host=settings.get('host'),
             )
         return self
-
-    def _get_eventstream(self, stream, event_store, mode):
-        if event_store:
-            if 'w' in mode and 'r' not in mode:
-                raise IntegrityError(stream)
-            eventstream = EventStream.make(event_store[0])
-        else:
-            if 'r' in mode and 'w' not in mode:
-                raise ObjectDoesNotExist(stream)
-            eventstream = EventStream()
-        return eventstream
 
     async def create_keyspace(self, keyspace):
         stmt = """
@@ -58,57 +46,92 @@ class EventStoreConnection:
             await cursor.execute(stmt)
 
     @async_contextmanager
-    async def open(self, name, mode='r', skip_version=0, optimistic=True):
-        """
-        Open stream and return a corresponding EventStream. If the stream cannot be opened, an ObjectDoesNotExist is raised.
-        """
-        name_splitted = name.split('/')
-        if len(name_splitted) != 2:
-            raise StreamDoesNotExist(name)
-        keyspace = '_'.join(name_splitted[:-1])
-        stream = name_splitted[-1]
+    async def open(self, keyspace):
         async with self.pool.cursor() as cursor:
-            async with cursor.begin() as transaction:
-                stmt_select = """
-                SELECT {keyspace}.data
-                FROM {keyspace} WHERE {keyspace}.id = %(id)s AND CAST(data ? '$version' AS INTEGER) >= %(version)s
-                """.format(keyspace=keyspace)
-                if not optimistic:
-                    stmt_select += " FOR UPDATE"
-                await cursor.execute(stmt_select, {
-                    'id': str(stream),
-                    'version': skip_version,
-                })
-                event_store = await cursor.fetchone()
-                eventstream = self._get_eventstream(stream, event_store, mode)
+            await yield_(EventStore(cursor, keyspace, self.projections))
 
-                await yield_(eventstream)
 
-                if not eventstream.exists():
-                    stmt_insert = """
-                    INSERT INTO {keyspace} (id, version, data, created_at, updated_at)
-                    VALUES (%(id)s, %(version)s, %(data)s, NOW(), NOW())
-                    """.format(keyspace=keyspace)
-                    await cursor.execute(stmt_insert, {
-                        'id': str(stream),
-                        'version': eventstream.current_version,
-                        'data': eventstream.json(),
-                    })
-                    await self.projections.notify_create(keyspace, stream, eventstream)
-                elif eventstream.current_version > eventstream.initial_version:
-                    stmt_update = """
-                    UPDATE {keyspace} SET data=%(data)s, updated_at=NOW(), version=%(current_version)s
-                    WHERE id = %(id)s AND version = %(initial_version)s;
-                    """.format(keyspace=keyspace)
-                    await cursor.execute(stmt_update, {
-                        'id': str(stream),
-                        'initial_version': eventstream.initial_version,
-                        'current_version': eventstream.current_version,
-                        'data': eventstream.json(),
-                    })
-                    if cursor.rowcount < 1:
-                        message = "The expected version is {expected_version}".format(
-                            expected_version=eventstream.initial_version,
-                        )
-                        raise VersionError(message)
-                    await self.projections.notify_update(keyspace, stream, eventstream)
+class EventStore:
+    def __init__(self, cursor, keyspace, projections):
+        self.cursor = cursor
+        self.keyspace = keyspace
+        self.projections = projections
+
+    async def get_stream(self, stream: str, start: int = 0, backward: bool = False):
+        stmt_select = """
+        SELECT {keyspace}.data
+        FROM {keyspace} WHERE {keyspace}.id = %(id)s
+        """.format(keyspace=self.keyspace)
+        if backward:
+            stmt_select += " AND CAST(data ? '$version' AS INTEGER) <= %(version)s"
+        else:
+            stmt_select += " AND CAST(data ? '$version' AS INTEGER) >= %(version)s"
+        await self.cursor.execute(stmt_select, {
+            'id': str(stream),
+            'version': start,
+        })
+        eventstore_stream = await self.cursor.fetchone()
+        if not eventstore_stream:
+            raise StreamDoesNotExist(stream)
+        return EventStream.make(eventstore_stream[0])
+
+    @async_generator
+    async def all_streams(self, start: int = 0, end: int = -1):
+        stmt_select = """
+        SELECT {keyspace}.data
+        FROM {keyspace}
+        """.format(keyspace=self.keyspace)
+        if start > 0:
+            stmt_select += " OFFSET {}".format(start)
+        if end > -1:
+            stmt_select += " LIMIT {}".format(end)
+        await self.cursor.execute(stmt_select)
+        eventstore = await self.cursor.fetchall()
+        for stream in eventstore:
+            await yield_(EventStream.make(stream[0]))
+
+    async def append_to_stream(self, stream: str, eventstream: EventStream, on_save=None):
+        try:
+            stored_eventstream = await self.get_stream(stream)
+
+            if stored_eventstream.current_version > eventstream.initial_version:
+                message = "The version '{0}' was expected in '{1}'".format(
+                    eventstream.initial_version,
+                    stored_eventstream,
+                )
+                raise VersionError(message)
+
+            stored_eventstream += eventstream
+
+            stmt_update = """
+            UPDATE {keyspace} SET data=%(data)s, updated_at=NOW(), version=%(current_version)s
+            WHERE id = %(id)s AND version = %(initial_version)s;
+            """.format(keyspace=self.keyspace)
+            await self.cursor.execute(stmt_update, {
+                'id': str(stream),
+                'initial_version': stored_eventstream.initial_version,
+                'current_version': stored_eventstream.current_version,
+                'data': stored_eventstream.json(),
+            })
+            if self.cursor.rowcount < 1:
+                message = "The version '{0}' was expected in '{1}'".format(
+                    eventstream.initial_version,
+                    stored_eventstream,
+                )
+                raise VersionError(message)
+            await self.projections.notify_update(self.keyspace, stream, stored_eventstream)
+            if on_save is not None:
+                on_save(stored_eventstream.current_version)
+        except StreamDoesNotExist:
+            stmt_insert = """
+            INSERT INTO {keyspace} (id, version, data, created_at, updated_at)
+            VALUES (%(id)s, %(version)s, %(data)s, NOW(), NOW())
+            """.format(keyspace=self.keyspace)
+            await self.cursor.execute(stmt_insert, {
+                'id': str(stream),
+                'version': eventstream.current_version,
+                'data': eventstream.json(),
+            })
+            await self.projections.notify_create(self.keyspace, stream, eventstream)
+            if on_save is not None:
+                on_save(eventstream.current_version)

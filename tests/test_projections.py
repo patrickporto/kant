@@ -40,7 +40,7 @@ class BankAccount(aggregates.Aggregate):
 
 
 @pytest.fixture
-async def eventstore(dbsession):
+async def eventsourcing(dbsession):
     eventstore = await connect(
         pool=dbsession,
     )
@@ -54,7 +54,7 @@ async def metadata():
 
 
 @pytest.mark.asyncio
-async def test_projection_should_create_projection(saconnection, eventstore, metadata):
+async def test_projection_should_create_projection(saconnection, eventsourcing, metadata):
     # arrange
     statement = sa.Table('statement', metadata,  # NOQA
         sa.Column('id', sa.Integer, primary_key=True),
@@ -77,15 +77,15 @@ async def test_projection_should_create_projection(saconnection, eventstore, met
     router = ProjectionRouter()
     router.add('event_store', statement, Statement)
     projection_adapter = SQLAlchemyProjectionAdapter(saconnection, router)
-    eventstore.projections.bind(projection_adapter)
+    eventsourcing.projections.bind(projection_adapter)
 
     bank_account = BankAccount()
     bank_account.dispatch(BankAccountCreated(
         id=123,
         owner='John Doe',
     ))
-    async with eventstore.open('event_store/{}'.format(bank_account.id), 'w') as eventstream:
-        eventstream += bank_account.get_events()
+    async with eventsourcing.open('event_store') as eventstore:
+        await eventstore.append_to_stream(bank_account.id, bank_account.get_events())
     # assert
     result = await saconnection.execute(statement.select())
     result = list(result)
@@ -96,7 +96,7 @@ async def test_projection_should_create_projection(saconnection, eventstore, met
 
 
 @pytest.mark.asyncio
-async def test_projection_should_update_projection(saconnection, eventstore, metadata):
+async def test_projection_should_update_projection(saconnection, eventsourcing, metadata):
     # arrange
     statement = sa.Table('statement', metadata,  # NOQA
         sa.Column('id', sa.Integer, primary_key=True),
@@ -123,7 +123,7 @@ async def test_projection_should_update_projection(saconnection, eventstore, met
     router = ProjectionRouter()
     router.add('event_store', statement, Statement)
     projection_adapter = SQLAlchemyProjectionAdapter(saconnection, router)
-    eventstore.projections.bind(projection_adapter)
+    eventsourcing.projections.bind(projection_adapter)
 
     bank_account_1 = BankAccount()
     bank_account_1.dispatch(BankAccountCreated(
@@ -135,22 +135,17 @@ async def test_projection_should_update_projection(saconnection, eventstore, met
         id=789,
         owner='John Doe',
     ))
-    async with eventstore.open('event_store/{}'.format(bank_account_1.id), 'w') as eventstream:
-        eventstream += bank_account_1.get_events()
-        bank_account_1.clear_events()
+    async with eventsourcing.open('event_store') as eventstore:
+        await eventstore.append_to_stream(bank_account_1.id, bank_account_1.get_events(), bank_account_1.notify_save)
+        await eventstore.append_to_stream(bank_account_2.id, bank_account_2.get_events(), bank_account_2.notify_save)
+        bank_account_1.dispatch(DepositPerformed(
+            amount=20,
+        ))
+        bank_account_1.dispatch(DepositPerformed(
+            amount=20,
+        ))
+        await eventstore.append_to_stream(bank_account_1.id, bank_account_1.get_events(), bank_account_1.notify_save)
 
-    async with eventstore.open('event_store/{}'.format(bank_account_2.id), 'w') as eventstream:
-        eventstream += bank_account_2.get_events()
-        bank_account_2.clear_events()
-
-    bank_account_1.dispatch(DepositPerformed(
-        amount=20,
-    ))
-    bank_account_1.dispatch(DepositPerformed(
-        amount=20,
-    ))
-    async with eventstore.open('event_store/{}'.format(bank_account_1.id), 'r') as eventstream:
-        eventstream += bank_account_1.get_events()
     # assert
     result = await saconnection.execute(statement.select())
     result = sorted(list(result), key=attrgetter('id'))
@@ -164,7 +159,7 @@ async def test_projection_should_update_projection(saconnection, eventstore, met
 
 
 @pytest.mark.asyncio
-async def test_projection_should_raise_exception_when_update_without_primary_keys(saconnection, eventstore, metadata):
+async def test_projection_should_raise_exception_when_update_without_primary_keys(saconnection, eventsourcing, metadata):
     # arrange
     statement = sa.Table('statement', metadata,  # NOQA
         sa.Column('id', sa.Integer, primary_key=True),
@@ -191,24 +186,21 @@ async def test_projection_should_raise_exception_when_update_without_primary_key
     router = ProjectionRouter()
     router.add('event_store', statement, Statement)
     projection_adapter = SQLAlchemyProjectionAdapter(saconnection, router)
-    eventstore.projections.bind(projection_adapter)
+    eventsourcing.projections.bind(projection_adapter)
 
     bank_account = BankAccount()
     bank_account.dispatch(BankAccountCreated(
         id=456,
         owner='John Doe',
     ))
-    async with eventstore.open('event_store/{}'.format(bank_account.id), 'w') as eventstream:
-        eventstream += bank_account.get_events()
-        bank_account.clear_events()
-
-    bank_account.dispatch(DepositPerformed(
-        amount=20,
-    ))
-    bank_account.dispatch(DepositPerformed(
-        amount=20,
-    ))
-    # assert
-    with pytest.raises(ProjectionError):
-        async with eventstore.open('event_store/{}'.format(bank_account.id), 'r') as eventstream:
-            eventstream += bank_account.get_events()
+    async with eventsourcing.open('event_store') as eventstore:
+        await eventstore.append_to_stream(bank_account.id, bank_account.get_events(), bank_account.notify_save)
+        bank_account.dispatch(DepositPerformed(
+            amount=20,
+        ))
+        bank_account.dispatch(DepositPerformed(
+            amount=20,
+        ))
+        # assert
+        with pytest.raises(ProjectionError):
+            await eventstore.append_to_stream(bank_account.id, bank_account.get_events(), bank_account.notify_save)
