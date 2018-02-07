@@ -23,6 +23,7 @@ def test_eventmodel_should_raise_when_encode_invalid_obj():
     # arrange
     serialized = {
         '$type': 'UtopicEvent',
+        '$version': 0,
         'amount': 20,
     }
     # act and assert

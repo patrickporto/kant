@@ -2,7 +2,7 @@ from abc import ABCMeta
 from kant.datamapper.base import ModelMeta, FieldMapping
 from kant.datamapper.fields import *  # NOQA
 from kant.datamapper.models import *  # NOQA
-from .exceptions import EventDoesNotExist
+from .exceptions import EventDoesNotExist, EventError
 
 
 class EventModel(FieldMapping, metaclass=ModelMeta):
@@ -13,6 +13,9 @@ class EventModel(FieldMapping, metaclass=ModelMeta):
 
     @classmethod
     def make(self, obj):
+        if self.EVENTMODEL_JSON_COLUMN not in obj:
+            msg = "'{}' is not defined in {}".format(self.EVENTMODEL_JSON_COLUMN, obj)
+            raise EventError(msg)
         event_name = obj[self.EVENTMODEL_JSON_COLUMN]
         events = [Event for Event in self.__subclasses__() if Event.__name__ == event_name]
         try:
