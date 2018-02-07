@@ -4,7 +4,7 @@ import pytest
 from kant import events
 
 
-class FoundAdded(events.EventModel):
+class FoundAdded(events.Event):
     amount = events.DecimalField()
 
 

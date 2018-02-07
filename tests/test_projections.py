@@ -10,18 +10,18 @@ from kant.projections import ProjectionError, ProjectionRouter
 from kant.projections.sa import SQLAlchemyProjectionAdapter
 
 
-class BankAccountCreated(events.EventModel):
+class BankAccountCreated(events.Event):
     __empty_stream__ = True
 
     id = events.CUIDField(primary_key=True)
     owner = events.CharField()
 
 
-class DepositPerformed(events.EventModel):
+class DepositPerformed(events.Event):
     amount = events.DecimalField()
 
 
-class WithdrawalPerformed(events.EventModel):
+class WithdrawalPerformed(events.Event):
     amount = events.DecimalField()
 
 

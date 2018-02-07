@@ -11,22 +11,22 @@ from kant.eventstore.stream import EventStream
 from kant import events
 
 
-class BankAccountCreated(events.EventModel):
+class BankAccountCreated(events.Event):
     __empty_stream__ = True
 
     id = events.CUIDField(primary_key=True)
     owner = events.CharField()
 
 
-class DepositPerformed(events.EventModel):
+class DepositPerformed(events.Event):
     amount = events.DecimalField()
 
 
-class WithdrawalPerformed(events.EventModel):
+class WithdrawalPerformed(events.Event):
     amount = events.DecimalField()
 
 
-class MyObjectCreated(events.EventModel):
+class MyObjectCreated(events.Event):
     id = events.CUIDField(primary_key=True)
     owner = events.CharField()
 

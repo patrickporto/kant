@@ -4,22 +4,22 @@ from kant.eventstore.exceptions import StreamExists, DependencyDoesNotExist
 from kant import events
 
 
-class BankAccountCreated(events.EventModel):
+class BankAccountCreated(events.Event):
     __empty_stream__ = True
 
     id = events.CUIDField(primary_key=True)
     owner = events.CharField()
 
 
-class DepositPerformed(events.EventModel):
+class DepositPerformed(events.Event):
     amount = events.DecimalField()
 
 
-class WithdrawalPerformed(events.EventModel):
+class WithdrawalPerformed(events.Event):
     amount = events.DecimalField()
 
 
-class OwnerChanged(events.EventModel):
+class OwnerChanged(events.Event):
     __dependencies__ = ['BankAccountCreated']
 
     new_owner = events.CharField()

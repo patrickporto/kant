@@ -25,11 +25,11 @@ Create declarative events
 ```python
 from kant import events
 
-class BankAccountCreated(events.EventModel):
+class BankAccountCreated(events.Event):
     id = events.CUIDField(primary_key=True)
     owner = events.CharField()
 
-class DepositPerformed(events.EventModel):
+class DepositPerformed(events.Event):
     amount = events.DecimalField()
 ```
 

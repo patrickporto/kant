@@ -1,25 +1,25 @@
 import pytest
-from kant.events import EventModel, DecimalField
+from kant.events import Event, DecimalField
 from kant.exceptions import EventDoesNotExist
 
 
-def test_eventmodel_should_encode_obj():
+def test_event_should_encode_obj():
     # arrange
-    class MyEventModel(EventModel):
+    class MyEvent(Event):
         amount = DecimalField()
 
     serialized = {
-        '$type': 'MyEventModel',
+        '$type': 'MyEvent',
         'amount': 20,
     }
     # act
-    my_event_model = EventModel.make(serialized)
+    my_event_model = Event.make(serialized)
     # assert
-    assert isinstance(my_event_model, MyEventModel), type(my_event_model)
+    assert isinstance(my_event_model, MyEvent), type(my_event_model)
     assert my_event_model.amount == 20
 
 
-def test_eventmodel_should_raise_when_encode_invalid_obj():
+def test_event_should_raise_when_encode_invalid_obj():
     # arrange
     serialized = {
         '$type': 'UtopicEvent',
@@ -28,4 +28,4 @@ def test_eventmodel_should_raise_when_encode_invalid_obj():
     }
     # act and assert
     with pytest.raises(EventDoesNotExist):
-        my_event_model = EventModel.make(serialized)
+        my_event_model = Event.make(serialized)
