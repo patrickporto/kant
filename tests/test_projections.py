@@ -6,7 +6,7 @@ from kant.eventstore import EventStream
 from kant import aggregates, events
 from kant.eventstore.connection import connect
 from kant import projections
-from kant.projections import ProjectionError
+from kant.projections import ProjectionError, ProjectionRouter
 from kant.projections.sa import SQLAlchemyProjectionAdapter
 
 
@@ -64,7 +64,6 @@ async def test_projection_should_create_projection(saconnection, eventstore, met
     await saconnection.execute(CreateTable(statement))
 
     class Statement(projections.Projection):
-        __keyspace__ = 'event_store'
         id = projections.IntegerField()
         owner = projections.CharField()
         balance = projections.IntegerField()
@@ -75,8 +74,9 @@ async def test_projection_should_create_projection(saconnection, eventstore, met
             self.balance = 0
 
     # act
-    projection_adapter = SQLAlchemyProjectionAdapter(saconnection)
-    projection_adapter.register(statement, Statement)
+    router = ProjectionRouter()
+    router.add('event_store', statement, Statement)
+    projection_adapter = SQLAlchemyProjectionAdapter(saconnection, router)
     eventstore.projections.bind(projection_adapter)
 
     bank_account = BankAccount()
@@ -120,8 +120,9 @@ async def test_projection_should_update_projection(saconnection, eventstore, met
             self.balance += event.amount
 
     # act
-    projection_adapter = SQLAlchemyProjectionAdapter(saconnection)
-    projection_adapter.register(statement, Statement)
+    router = ProjectionRouter()
+    router.add('event_store', statement, Statement)
+    projection_adapter = SQLAlchemyProjectionAdapter(saconnection, router)
     eventstore.projections.bind(projection_adapter)
 
     bank_account_1 = BankAccount()
@@ -187,8 +188,9 @@ async def test_projection_should_raise_exception_when_update_without_primary_key
             self.balance += event.amount
 
     # act
-    projection_adapter = SQLAlchemyProjectionAdapter(saconnection)
-    projection_adapter.register(statement, Statement)
+    router = ProjectionRouter()
+    router.add('event_store', statement, Statement)
+    projection_adapter = SQLAlchemyProjectionAdapter(saconnection, router)
     eventstore.projections.bind(projection_adapter)
 
     bank_account = BankAccount()

@@ -2,25 +2,10 @@ from collections import namedtuple
 from asyncio_extras.contextmanager import async_contextmanager
 from async_generator import yield_
 import aiopg
+from kant.projections import ProjectionManager
 from ..exceptions import (ObjectDoesNotExist, IntegrityError,
                           StreamDoesNotExist, VersionError)
 from ..stream import EventStream
-
-
-class ProjectionManager:
-    def __init__(self):
-        self._adapters = set()
-
-    def bind(self, adapter):
-        self._adapters.add(adapter)
-
-    async def notify_create(self, *args, **kwargs):
-        for adapter in self._adapters:
-            await adapter.handle_create(*args, **kwargs)
-
-    async def notify_update(self, *args, **kwargs):
-        for adapter in self._adapters:
-            await adapter.handle_update(*args, **kwargs)
 
 
 class EventStoreConnection:
