@@ -9,14 +9,10 @@ class EventStream:
         self.initial_version = -1
         self.current_version = -1
         self._events = set()
-        if events is None:
-            events = []
-        else:
-            events = list(events)
-
-        for event in events:
-            self.initial_version += 1
-            self.add(event)
+        if events is not None:
+            for event in list(events):
+                self.initial_version += 1
+                self.add(event)
 
     def __eq__(self, event_stream):
         return self.current_version == event_stream.current_version
