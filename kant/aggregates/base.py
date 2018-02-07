@@ -3,7 +3,7 @@ from inflection import underscore
 from kant.eventstore.stream import EventStream
 from kant.datamapper.base import ModelMeta, FieldMapping
 from kant.datamapper.fields import *  # NOQA
-from .exceptions import CommandError
+from .exceptions import AggregateError
 
 
 class Aggregate(FieldMapping, metaclass=ModelMeta):
@@ -12,6 +12,16 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
         self._all_events = EventStream()
         self._events = EventStream()
         self._stored_events = EventStream()
+    
+    def _get_pk(self):
+        primary_keys = self.primary_keys().values()
+        if not primary_keys:
+            msg = "Nothing primary key defined for '{}'".format(self.__class__.__name__)
+            raise AggregateError(msg)
+        elif len(primary_keys) > 1:
+            msg = "Many primary keys defined for '{}'".format(self.__class__.__name__)
+            raise AggregateError(msg)
+        return primary_keys[0]
 
     def all_events(self):
         return self._all_events
@@ -22,7 +32,8 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
     def get_events(self):
         return self._events
 
-    def notify_save(self, new_version):
+    def notify_save(self, pk, new_version):
+        self.pk = pk
         self._events.clear()
         self._events.initial_version = new_version
 
@@ -38,9 +49,9 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
         try:
             method = getattr(self, method_name)
             method(event)
-        except AttributeError:
-            msg = "The command for '{}' is not defined".format(event.__class__.__name__)
-            raise CommandError(msg)
+        except AggregateError:
+            msg = "The method for '{}' is not defined".format(event.__class__.__name__)
+            raise Aggregate(msg)
 
     def dispatch(self, events, flush=True):
         if isinstance(events, list):
@@ -65,4 +76,16 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
     def from_stream(cls, stream):
         self = cls()
         self.fetch_events(stream)
+        return self
+
+    def create_snapshot(self, eventstore):
+        aggregate = self.from_stream(self.stored_events())
+        eventstore.save_snapshot(self._get_pk(), aggregate.json(), aggregate.current_version)
+
+    @classmethod
+    def from_snapshot(cls, eventstore):
+        snapshot = eventstore.get_snapshot(self._get_pk())
+        self = cls()
+        for field, value in snapshot.items():
+            self[field] = value
         return self

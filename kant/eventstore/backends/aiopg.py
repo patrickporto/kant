@@ -3,8 +3,9 @@ from asyncio_extras.contextmanager import async_contextmanager
 from async_generator import yield_, async_generator
 import aiopg
 from kant.projections import ProjectionManager
-from ..exceptions import (StreamDoesNotExist, VersionError)
+from ..exceptions import (StreamDoesNotExist, VersionError, SnapshotDoesNotExist)
 from ..stream import EventStream
+from ..snapshots import Snapshot
 
 
 class EventStoreConnection:
@@ -26,7 +27,7 @@ class EventStoreConnection:
         return self
 
     async def create_keyspace(self, keyspace):
-        stmt = """
+        create_table = """
         CREATE TABLE IF NOT EXISTS {keyspace} (
             id varchar(255),
             data jsonb NOT NULL,
@@ -35,15 +36,29 @@ class EventStoreConnection:
             version bigserial NOT NULL
         )
         """.format(keyspace=keyspace)
-        async with self.pool.cursor() as cursor:
-            await cursor.execute(stmt)
-
-    async def drop_keyspace(self, keyspace):
-        stmt = """
-        DROP TABLE {keyspace}
+        create_snapshot = """
+        CREATE TABLE IF NOT EXISTS {keyspace}_snapshots (
+            id varchar(255),
+            data jsonb NOT NULL,
+            created_at timestamp NOT NULL,
+            updated_at timestamp NOT NULL,
+            version bigserial NOT NULL
+        )
         """.format(keyspace=keyspace)
         async with self.pool.cursor() as cursor:
-            await cursor.execute(stmt)
+            await cursor.execute(create_table)
+            await cursor.execute(create_snapshot)
+
+    async def drop_keyspace(self, keyspace):
+        drop_table = """
+        DROP TABLE {keyspace}
+        """.format(keyspace=keyspace)
+        drop_snapshot = """
+        DROP TABLE {keyspace}_snapshots
+        """.format(keyspace=keyspace)
+        async with self.pool.cursor() as cursor:
+            await cursor.execute(drop_table)
+            await cursor.execute(drop_snapshot)
 
     @async_contextmanager
     async def open(self, keyspace):
@@ -121,7 +136,7 @@ class EventStore:
                 raise VersionError(message)
             await self.projections.notify_update(self.keyspace, stream, stored_eventstream)
             if on_save is not None:
-                on_save(stored_eventstream.current_version)
+                on_save(stream, stored_eventstream.current_version)
         except StreamDoesNotExist:
             stmt_insert = """
             INSERT INTO {keyspace} (id, version, data, created_at, updated_at)
@@ -134,4 +149,29 @@ class EventStore:
             })
             await self.projections.notify_create(self.keyspace, stream, eventstream)
             if on_save is not None:
-                on_save(eventstream.current_version)
+                on_save(stream, eventstream.current_version)
+
+    async def save_snapshot(self, stream: str, data, version: int):
+        create_snapshot = """
+        INSERT INTO {keyspace}_snapshots (id, version, data, created_at, updated_at)
+        VALUES (%(id)s, %(version)s, %(data)s, NOW(), NOW())
+        """.format(keyspace=self.keyspace)
+        await self.cursor.execute(create_snapshot, {
+            'id': str(stream),
+            'version': version,
+            'data': data,
+        })
+
+    async def get_snapshot(self, stream: str):
+        select_snapshot = """
+        SELECT data, version
+        FROM {keyspace}_snapshots WHERE id = %(id)s
+        ORDER BY version DESC
+        LIMIT 1
+        """.format(keyspace=self.keyspace)
+        snapshot = await self.cursor.execute(select_snapshot, {
+            'id': str(stream),
+        })
+        if not snapshot:
+            raise SnapshotDoesNotExist(stream)
+        return Snapshot(data=snapshot[0], version=snapshot[1])
