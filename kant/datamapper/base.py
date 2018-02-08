@@ -114,3 +114,13 @@ class FieldMapping(MutableMapping):
             if field.primary_key:
                 primary_keys[field_name] = field_value
         return primary_keys
+
+    def get_pk(self):
+        primary_keys = list(self.primary_keys().values())
+        if not primary_keys:
+            msg = "Nothing primary key defined for '{}'".format(self.__class__.__name__)
+            raise AggregateError(msg)
+        elif len(primary_keys) > 1:
+            msg = "Many primary keys defined for '{}'".format(self.__class__.__name__)
+            raise AggregateError(msg)
+        return primary_keys[0]

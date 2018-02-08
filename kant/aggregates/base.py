@@ -1,12 +1,43 @@
 from copy import deepcopy
+from async_generator import yield_, async_generator
 from inflection import underscore
-from kant.eventstore.stream import EventStream
 from kant.datamapper.base import ModelMeta, FieldMapping
 from kant.datamapper.fields import *  # NOQA
-from .exceptions import CommandError
+from kant.eventstore import EventStream, get_connection
+from .exceptions import AggregateError
 
 
-class Aggregate(FieldMapping, metaclass=ModelMeta):
+class Manager:
+    def __init__(self, model, keyspace, using=None):
+        self._model = model
+        self._conn = using or get_connection()
+        self.keyspace = keyspace
+
+    async def save(self, aggregate_id, events, notify_save):
+        async with self._conn.open(self.keyspace) as eventstore:
+            await eventstore.append_to_stream(aggregate_id, events, notify_save)
+
+    async def get(self, aggregate_id):
+        async with self._conn.open(self.keyspace) as eventstore:
+            stream = await eventstore.get_stream(aggregate_id)
+            return self._model.from_stream(stream)
+
+    @async_generator
+    async def all(self):
+        async with self._conn.open(self.keyspace) as eventstore:
+            async for stream in eventstore.all_streams():
+                await yield_(self._model.from_stream(stream))
+
+
+class AggregateMeta(ModelMeta):
+    def __new__(mcs, class_name, bases, attrs):
+        cls = ModelMeta.__new__(mcs, class_name, bases, attrs)
+        if '__keyspace__' in attrs.keys():
+            cls.objects = Manager(model=cls, keyspace=attrs['__keyspace__'])
+        return cls
+
+
+class Aggregate(FieldMapping, metaclass=AggregateMeta):
     def __init__(self):
         super().__init__()
         self._all_events = EventStream()
@@ -38,7 +69,7 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
         try:
             method = getattr(self, method_name)
             method(event)
-        except AttributeError:
+        except AggregateError:
             msg = "The command for '{}' is not defined".format(event.__class__.__name__)
             raise CommandError(msg)
 
@@ -66,3 +97,6 @@ class Aggregate(FieldMapping, metaclass=ModelMeta):
         self = cls()
         self.fetch_events(stream)
         return self
+
+    async def save(self):
+        return await self.objects.save(self.get_pk(), self._events, self.notify_save)

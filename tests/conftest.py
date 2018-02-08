@@ -3,6 +3,7 @@ from async_generator import yield_, async_generator
 from aiopg.sa import create_engine
 import aiopg
 import pytest
+from kant.eventstore.connection import connect
 
 
 @pytest.fixture
@@ -33,3 +34,14 @@ async def saconnection():
         async with conn.begin() as transaction:
             await yield_(conn)
             await transaction.rollback()
+
+
+@pytest.fixture
+@async_generator
+async def eventsourcing(dbsession):
+    eventstore = await connect(
+        pool=dbsession,
+    )
+    await eventstore.create_keyspace('event_store')
+    await yield_(eventstore)
+    await eventstore.drop_keyspace('event_store')

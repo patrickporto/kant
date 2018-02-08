@@ -80,6 +80,7 @@ class EventStore:
         stmt_select = """
         SELECT {keyspace}.data
         FROM {keyspace}
+        ORDER BY id
         """.format(keyspace=self.keyspace)
         if start > 0:
             stmt_select += " OFFSET {}".format(start)

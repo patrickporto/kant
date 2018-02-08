@@ -1,12 +1,10 @@
 from copy import deepcopy
 from operator import attrgetter
 from os import environ
-from async_generator import yield_, async_generator
 import json
 import pytest
 from kant.aggregates import Aggregate
 from kant.exceptions import StreamDoesNotExist, VersionError
-from kant.eventstore.connection import connect
 from kant.eventstore.stream import EventStream
 from kant import events
 
@@ -31,19 +29,8 @@ class MyObjectCreated(events.Event):
     owner = events.CharField()
 
 
-@pytest.fixture
-@async_generator
-async def connection(dbsession):
-    eventstore = await connect(
-        pool=dbsession,
-    )
-    await eventstore.create_keyspace('event_store')
-    await yield_(eventstore)
-    await eventstore.drop_keyspace('event_store')
-
-
 @pytest.mark.asyncio
-async def test_save_should_create_event_store(dbsession, connection):
+async def test_save_should_create_event_store(dbsession, eventsourcing):
     # arrange
     aggregate_id = '052c21b6-aab9-4311-b954-518cd04f704c'
     events = EventStream([
@@ -53,7 +40,7 @@ async def test_save_should_create_event_store(dbsession, connection):
         )
     ])
     # act
-    async with connection.open('event_store') as eventstore:
+    async with eventsourcing.open('event_store') as eventstore:
         await eventstore.append_to_stream(aggregate_id, events)
         result = await eventstore.get_stream(aggregate_id)
 
@@ -77,7 +64,7 @@ async def test_save_should_create_event_store(dbsession, connection):
 
 
 @pytest.mark.asyncio
-async def test_eventstore_should_fetch_one_stream(dbsession, connection):
+async def test_eventstore_should_fetch_one_stream(dbsession, eventsourcing):
     # arrange
     stmt = """
     INSERT INTO event_store (id, data, created_at, updated_at)
@@ -96,7 +83,7 @@ async def test_eventstore_should_fetch_one_stream(dbsession, connection):
             }]),
         })
     # act
-    async with connection.open('event_store') as eventstore:
+    async with eventsourcing.open('event_store') as eventstore:
         stored_events = await eventstore.get_stream(aggregate_id)
     # assert
     assert len(stored_events) == 1
@@ -108,7 +95,7 @@ async def test_eventstore_should_fetch_one_stream(dbsession, connection):
 
 
 @pytest.mark.asyncio
-async def test_eventstore_should_fetch_all_streams(dbsession, connection):
+async def test_eventstore_should_fetch_all_streams(dbsession, eventsourcing):
     # arrange
     stmt = """
     INSERT INTO event_store (id, data, created_at, updated_at)
@@ -144,7 +131,7 @@ async def test_eventstore_should_fetch_all_streams(dbsession, connection):
             ]),
         })
     # act
-    async with connection.open('event_store') as eventstore:
+    async with eventsourcing.open('event_store') as eventstore:
         stored_eventstreams = []
         async for stream in eventstore.all_streams():
             stored_eventstreams.append(stream)
@@ -165,17 +152,17 @@ async def test_eventstore_should_fetch_all_streams(dbsession, connection):
 
 
 @pytest.mark.asyncio
-async def test_get_should_raise_exception_when_not_found(connection):
+async def test_get_should_raise_exception_when_not_found(eventsourcing):
     # arrange
     aggregate_id = 'f2283f9d-9ed2-4385-a614-53805725cbac',
     # act and assert
-    async with connection.open('event_store') as eventstore:
+    async with eventsourcing.open('event_store') as eventstore:
         with pytest.raises(StreamDoesNotExist):
             stored_events = await eventstore.get_stream(aggregate_id)
 
 
 @pytest.mark.asyncio
-async def test_eventstore_should_raise_version_error(dbsession, connection):
+async def test_eventstore_should_raise_version_error(dbsession, eventsourcing):
     # arrange
     aggregate_id = 'f2283f9d-9ed2-4385-a614-53805725cbac'
     events_base = EventStream([
@@ -189,7 +176,7 @@ async def test_eventstore_should_raise_version_error(dbsession, connection):
             amount=20
         )
     ])
-    async with connection.open('event_store') as eventstore:
+    async with eventsourcing.open('event_store') as eventstore:
         await eventstore.append_to_stream(aggregate_id, events_base)
 
     # act
@@ -204,5 +191,5 @@ async def test_eventstore_should_raise_version_error(dbsession, connection):
         })
     # assert
     with pytest.raises(VersionError):
-        async with connection.open('event_store') as eventstore:
+        async with eventsourcing.open('event_store') as eventstore:
             await eventstore.append_to_stream(aggregate_id, events)

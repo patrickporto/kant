@@ -1,7 +1,6 @@
 import pytest
-from kant import aggregates
+from kant import aggregates, events
 from kant.eventstore import EventStream
-from kant import events
 
 
 class BankAccountCreated(events.Event):
@@ -388,3 +387,132 @@ async def test_aggregate_should_decode_to_json(dbsession):
     expected_result = '{"balance": 20, "id": 123, "owner": "John Doe"}'
     assert isinstance(result, str)
     assert result == expected_result
+
+
+@pytest.mark.asyncio
+async def test_aggregate_should_save_to_eventstore(dbsession, eventsourcing):
+    # arrange
+    class BankAccount(aggregates.Aggregate):
+        __keyspace__ = 'event_store'
+        id = aggregates.IntegerField(primary_key=True)
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
+
+        def apply_bank_account_created(self, event):
+            self.id = event.get('id')
+            self.owner = event.get('owner')
+            self.balance = 0
+
+        def apply_deposit_performed(self, event):
+            self.balance += event.get('amount')
+
+    bank_account_created = BankAccountCreated(
+        id=123,
+        owner='John Doe',
+    )
+    deposit_performed = DepositPerformed(
+        amount=20,
+    )
+    # act
+    bank_account = BankAccount()
+    bank_account.dispatch([bank_account_created, deposit_performed])
+    await bank_account.save()
+    async with eventsourcing.open('event_store') as eventstore:
+        stored_events = await eventstore.get_stream(bank_account.id)
+        stored_bank_account = BankAccount.from_stream(stored_events)
+    # assert
+    assert stored_bank_account.version == 1
+    assert stored_bank_account.current_version == 1
+    assert stored_bank_account.id == 123
+    assert stored_bank_account.owner == 'John Doe'
+    assert stored_bank_account.balance == 20
+
+
+@pytest.mark.asyncio
+async def test_manager_should_get_aggregate(dbsession, eventsourcing):
+    # arrange
+    class BankAccount(aggregates.Aggregate):
+        __keyspace__ = 'event_store'
+        id = aggregates.IntegerField(primary_key=True)
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
+
+        def apply_bank_account_created(self, event):
+            self.id = event.get('id')
+            self.owner = event.get('owner')
+            self.balance = 0
+
+        def apply_deposit_performed(self, event):
+            self.balance += event.get('amount')
+
+    bank_account_created = BankAccountCreated(
+        id=123,
+        owner='John Doe',
+    )
+    deposit_performed = DepositPerformed(
+        amount=20,
+    )
+    # act
+    bank_account = BankAccount()
+    bank_account.dispatch([bank_account_created, deposit_performed])
+    async with eventsourcing.open('event_store') as eventstore:
+        await eventstore.append_to_stream(bank_account.id, bank_account.get_events())
+    stored_bank_account = await BankAccount.objects.get(bank_account_created.id)
+    # assert
+    assert stored_bank_account.version == 1
+    assert stored_bank_account.current_version == 1
+    assert stored_bank_account.id == 123
+    assert stored_bank_account.owner == 'John Doe'
+    assert stored_bank_account.balance == 20
+
+
+@pytest.mark.asyncio
+async def test_manager_aggregate_should_find_all_aggregates(dbsession, eventsourcing):
+    # arrange
+    class BankAccount(aggregates.Aggregate):
+        __keyspace__ = 'event_store'
+        id = aggregates.IntegerField(primary_key=True)
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
+
+        def apply_bank_account_created(self, event):
+            self.id = event.get('id')
+            self.owner = event.get('owner')
+            self.balance = 0
+
+        def apply_deposit_performed(self, event):
+            self.balance += event.get('amount')
+
+    # act
+    bank_account_1 = BankAccount()
+    bank_account_1.dispatch([BankAccountCreated(
+        id=123,
+        owner='John Doe',
+    ), DepositPerformed(
+        amount=20,
+    )])
+    await bank_account_1.save()
+    bank_account_2 = BankAccount()
+    bank_account_2.dispatch([BankAccountCreated(
+        id=456,
+        owner='John Doe',
+    ), DepositPerformed(
+        amount=20,
+    ), DepositPerformed(
+        amount=20,
+    )])
+    await bank_account_2.save()
+    stored_aggregates = []
+    async for aggregate in BankAccount.objects.all():
+        stored_aggregates.append(aggregate)
+    # assert
+    assert stored_aggregates[0].version == 1
+    assert stored_aggregates[0].current_version == 1
+    assert stored_aggregates[0].id == 123
+    assert stored_aggregates[0].owner == 'John Doe'
+    assert stored_aggregates[0].balance == 20
+    assert stored_aggregates[1].version == 2
+    assert stored_aggregates[1].current_version == 2
+    assert stored_aggregates[1].id == 456
+    assert stored_aggregates[1].owner == 'John Doe'
+    assert stored_aggregates[1].balance == 40

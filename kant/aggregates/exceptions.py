@@ -1,0 +1,2 @@
+class AggregateError(Exception):
+    pass

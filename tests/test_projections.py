@@ -1,11 +1,10 @@
 from operator import attrgetter
 from sqlalchemy.schema import CreateTable, DropTable
+from async_generator import yield_, async_generator
 import sqlalchemy as sa
 import pytest
+from kant import aggregates, events, projections
 from kant.eventstore import EventStream
-from kant import aggregates, events
-from kant.eventstore.connection import connect
-from kant import projections
 from kant.projections import ProjectionError, ProjectionRouter
 from kant.projections.sa import SQLAlchemyProjectionAdapter
 
@@ -40,29 +39,21 @@ class BankAccount(aggregates.Aggregate):
 
 
 @pytest.fixture
-async def eventsourcing(dbsession):
-    eventstore = await connect(
-        pool=dbsession,
-    )
-    await eventstore.create_keyspace('event_store')
-    return eventstore
-
-
-@pytest.fixture
-async def metadata():
-    return sa.MetaData()
-
-
-@pytest.mark.asyncio
-async def test_projection_should_create_projection(saconnection, eventsourcing, metadata):
-    # arrange
-    statement = sa.Table('statement', metadata,  # NOQA
+@async_generator
+async def statement(saconnection):
+    statement = sa.Table('statement', sa.MetaData(),  # NOQA
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('owner', sa.String(255)),
         sa.Column('balance', sa.Integer),
     )
     await saconnection.execute(CreateTable(statement))
+    await yield_(statement)
+    await saconnection.execute(DropTable(statement))
 
+
+@pytest.mark.asyncio
+async def test_projection_should_create_projection(saconnection, eventsourcing, statement):
+    # arrange
     class Statement(projections.Projection):
         id = projections.IntegerField()
         owner = projections.CharField()
@@ -96,15 +87,8 @@ async def test_projection_should_create_projection(saconnection, eventsourcing, 
 
 
 @pytest.mark.asyncio
-async def test_projection_should_update_projection(saconnection, eventsourcing, metadata):
+async def test_projection_should_update_projection(saconnection, eventsourcing, statement):
     # arrange
-    statement = sa.Table('statement', metadata,  # NOQA
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('owner', sa.String(255)),
-        sa.Column('balance', sa.Integer),
-    )
-    await saconnection.execute(CreateTable(statement))
-
     class Statement(projections.Projection):
         __keyspace__ = 'event_store'
         id = projections.IntegerField(primary_key=True)
@@ -159,15 +143,8 @@ async def test_projection_should_update_projection(saconnection, eventsourcing, 
 
 
 @pytest.mark.asyncio
-async def test_projection_should_raise_exception_when_update_without_primary_keys(saconnection, eventsourcing, metadata):
+async def test_projection_should_raise_exception_when_update_without_primary_keys(saconnection, eventsourcing, statement):
     # arrange
-    statement = sa.Table('statement', metadata,  # NOQA
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('owner', sa.String(255)),
-        sa.Column('balance', sa.Integer),
-    )
-    await saconnection.execute(CreateTable(statement))
-
     class Statement(projections.Projection):
         __keyspace__ = 'event_store'
         id = projections.IntegerField()
