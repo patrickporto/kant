@@ -13,8 +13,8 @@ A CQRS and Event Sourcing framework, safe for humans.
 * Event Store
 * Optimistic concurrency control
 * JSON serialization
+* SQLAlchemy Projections
 * Snapshots **[IN PROGRESS]**
-* Projections **[IN PROGRESS]**
 
 Kant officially supports Python 3.5-3.6.
 
@@ -55,9 +55,9 @@ class BankAccount(aggregates.Aggregate):
 Now, save the events
 
 ```python
-from kant.eventstore.connection import connect
+from kant.eventstore import connect
 
-conn = await connect(user='user', password='user', database='database')
+await connect(user='user', password='user', database='database')
 
 # create event store for bank_account
 conn.create_keyspace('bank_account')
@@ -73,16 +73,9 @@ deposit_performed = DepositPerformed(
 
 bank_account = BankAccount()
 bank_account.dispatch([bank_account_created, deposit_performed])
+bank_account.save()
 
-# insert the events into EventStore
-async with conn.open('bank_account/{}'.format(bank_account.id), 'w') as eventstream:
-    eventstream += bank_account.get_events()
-```
-
-Load the events from EventStore
-```python
-async with conn.open('bank_account/123', 'w') as eventstream:
-    bank_account = BankAccount.from_stream(eventstream)
+stored_bank_account = BankAccount.objects.get(123)
 ```
 
 ## Installing
