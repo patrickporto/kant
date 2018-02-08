@@ -102,8 +102,11 @@ class FieldMapping(MutableMapping):
     def decode(self):
         return {key: value for key, value in self.serializeditems()}
 
-    def json(self):
-        return json.dumps(self.decode(), sort_keys=True)
+    def json(self, only=None):
+        data = self.decode()
+        if only is not None:
+            data = {key: value for key, value in data.items() if key in only}
+        return json.dumps(data, sort_keys=True)
 
     def primary_keys(self):
         primary_keys = {}

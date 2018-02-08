@@ -390,6 +390,43 @@ async def test_aggregate_should_decode_to_json(dbsession):
 
 
 @pytest.mark.asyncio
+async def test_aggregate_should_decode_to_json_filtering_by_fields(dbsession):
+    # arrange
+    class BankAccount(aggregates.Aggregate):
+        id = aggregates.IntegerField()
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
+
+        def apply_bank_account_created(self, event):
+            self.id = event.id
+            self.owner = event.owner
+            self.balance = 0
+
+        def apply_deposit_performed(self, event):
+            self.balance += event.amount
+
+    events = EventStream([
+        BankAccountCreated(
+            id=123,
+            owner='John Doe',
+            version=0,
+        )
+    ])
+    deposit_performed = DepositPerformed(
+        amount=20,
+    )
+    # act
+    bank_account = BankAccount()
+    bank_account.fetch_events(events)
+    bank_account.dispatch(deposit_performed)
+    result = bank_account.json(only=('id',))
+    # assert
+    expected_result = '{"id": 123}'
+    assert isinstance(result, str)
+    assert result == expected_result
+
+
+@pytest.mark.asyncio
 async def test_aggregate_should_save_to_eventstore(dbsession, eventsourcing):
     # arrange
     class BankAccount(aggregates.Aggregate):
