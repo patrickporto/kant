@@ -28,6 +28,10 @@ class Manager:
             async for stream in eventstore.all_streams():
                 await yield_(self._model.from_stream(stream))
 
+    async def get_stream(self, aggregate_id):
+        async with self._conn.open(self.keyspace) as eventstore:
+            return await eventstore.get_stream(aggregate_id)
+
 
 class AggregateMeta(ModelMeta):
     def __new__(mcs, class_name, bases, attrs):
@@ -56,10 +60,13 @@ class Aggregate(FieldMapping, metaclass=AggregateMeta):
     def notify_save(self, new_version):
         self._events.clear()
         self._events.initial_version = new_version
+        self._all_events.initial_version = new_version
+        self._stored_events.initial_version = new_version
 
     def fetch_events(self, events: EventStream):
         self._stored_events = deepcopy(events)
         self._all_events = deepcopy(self._stored_events)
+        self._events.initial_version = events.initial_version
         for event in events:
             self.dispatch(event, flush=False)
 
@@ -99,4 +106,9 @@ class Aggregate(FieldMapping, metaclass=AggregateMeta):
         return self
 
     async def save(self):
-        return await self.objects.save(self.get_pk(), self._events, self.notify_save)
+        return await self.objects.save(self.get_pk(), self.get_events(), self.notify_save)
+
+    async def refresh_from_db(self):
+        stream = await self.objects.get_stream(self.get_pk())
+        self.fetch_events(stream)
+        return self

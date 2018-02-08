@@ -516,3 +516,44 @@ async def test_manager_aggregate_should_find_all_aggregates(dbsession, eventsour
     assert stored_aggregates[1].id == 456
     assert stored_aggregates[1].owner == 'John Doe'
     assert stored_aggregates[1].balance == 40
+
+
+@pytest.mark.asyncio
+async def test_aggregate_should_refresh_from_db(dbsession, eventsourcing):
+    # arrange
+    class BankAccount(aggregates.Aggregate):
+        __keyspace__ = 'event_store'
+        id = aggregates.IntegerField(primary_key=True)
+        owner = aggregates.CharField()
+        balance = aggregates.IntegerField()
+
+        def apply_bank_account_created(self, event):
+            self.id = event.get('id')
+            self.owner = event.get('owner')
+            self.balance = 0
+
+        def apply_deposit_performed(self, event):
+            self.balance += event.get('amount')
+
+    # act
+    bank_account = BankAccount()
+    bank_account.dispatch([BankAccountCreated(
+        id=123,
+        owner='John Doe',
+    ), DepositPerformed(
+        amount=20,
+    )])
+    await bank_account.save()
+    stored_bank_account_1 = await BankAccount.objects.get(bank_account.id)
+    stored_bank_account_2 = await BankAccount.objects.get(bank_account.id)
+    stored_bank_account_1.dispatch(DepositPerformed(
+        amount=20,
+    ))
+    await stored_bank_account_1.save()
+    await stored_bank_account_2.refresh_from_db()
+    # assert
+    assert stored_bank_account_2.version == 2
+    assert stored_bank_account_2.current_version == 2
+    assert stored_bank_account_2.id == 123
+    assert stored_bank_account_2.owner == 'John Doe'
+    assert stored_bank_account_2.balance == 40
