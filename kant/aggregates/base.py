@@ -10,8 +10,14 @@ from .exceptions import AggregateError
 class Manager:
     def __init__(self, model, keyspace, using=None):
         self._model = model
-        self._conn = using or get_connection()
+        self.using = using
         self.keyspace = keyspace
+
+    @property
+    def _conn(self):
+        if self.using is None:
+            return get_connection()
+        return self.using
 
     async def save(self, aggregate_id, events, notify_save):
         async with self._conn.open(self.keyspace) as eventstore:
