@@ -25,6 +25,9 @@ class EventStoreConnection:
             )
         return self
 
+    async def close(self):
+        await self.pool.close()
+
     async def create_keyspace(self, keyspace):
         stmt = """
         CREATE TABLE IF NOT EXISTS {keyspace} (

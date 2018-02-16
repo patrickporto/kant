@@ -45,3 +45,4 @@ async def eventsourcing(dbsession):
     await eventstore.create_keyspace('event_store')
     await yield_(eventstore)
     await eventstore.drop_keyspace('event_store')
+    await eventstore.close()
