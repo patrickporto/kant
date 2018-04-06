@@ -5,19 +5,21 @@ from setuptools import setup, find_packages
 BASE_DIR = path.dirname(__file__)
 
 
-with open(path.join(BASE_DIR, 'README.md')) as f:
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
 setup(
     name='kant',
     version='2.1.0',
-    description='The CQRS and Event Sourcing framework for Python',
+    description='A CQRS and Event Sourcing framework for Python',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     url='http://github.com/patrickporto/kant',
     author='Patrick Porto',
     author_email='patrick.s.porto@gmail.com',
     license='MIT',
-    packages=find_packages(exclude=['conftest.py']),
+    packages=find_packages(exclude=['conftest.py', 'docs', 'tests']),
     install_requires=[
         'python-dateutil',
         'inflection',
@@ -26,7 +28,6 @@ setup(
         'asyncio_extras',
         'aiopg',
     ],
-    long_description=long_description,
     setup_requires=[
         'pytest-runner',
     ],
@@ -53,5 +54,6 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
     ],
+    python_requires='~=3.5',
     keywords='eventsourcing cqrs eventstore',
 )
