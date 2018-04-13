@@ -1,0 +1,12 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+
+"a14ec56" = {path = "/home/patrickporto/Projects/kant", editable = true}
+sphinx = "*"
+"sphinx-autobuild" = "*"
+
+[packages]

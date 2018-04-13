@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add CHANGELOG
 - Initial configuration for sphinx
 
+### Changed
+- Improves the contribute guide
+
 ## [2.1.0] - 2018-02-16
 ### Added
 - Add close on EventStoreConnection
@@ -32,7 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add only option on json method
 
 ### Changed
-- Reame EventModel to Event
+- Rename EventModel to Event
 
 ### Fixed
 - Side effect on EventStream
