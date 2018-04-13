@@ -113,6 +113,9 @@ html_sidebars = {
 
 html_theme_options = {
     'show_related': True,
+    'logo': 'logo.jpg',
+    'logo_name': True,
+    'description': 'A CQRS and Event Sourcing framework for Python',
     'github_user': 'patrickporto',
     'github_repo': 'kant',
 }
