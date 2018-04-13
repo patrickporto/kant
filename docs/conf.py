@@ -51,6 +51,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
+project = "Kant"
 copyright = '2018, Patrick Porto'
 author = 'Patrick Porto'
 
@@ -103,11 +104,18 @@ html_static_path = ['_static']
 # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
 html_sidebars = {
     '**': [
+        'about.html',
+        'navigation.html',
         'relations.html',  # needs 'show_related': True theme option to display
         'searchbox.html',
     ]
 }
 
+html_theme_options = {
+    'show_related': True,
+    'github_user': 'patrickporto',
+    'github_repo': 'kant',
+}
 
 # -- Options for HTMLHelp output ------------------------------------------
 
