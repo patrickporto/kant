@@ -1,17 +1,46 @@
 from os import path
+from io import open
 from setuptools import setup, find_packages
+try:
+    from sphinx.setup_command import BuildDoc
+except ImportError:
+    BuildDoc = None
+#==============================================================================
+# INTERFACE
+#==============================================================================
 
+NAME = 'Kant'
+VERSION = '3.0'
+RELEASE = '3.0.0'
+
+#==============================================================================
+# IMPLEMENTATION
+#==============================================================================
 
 BASE_DIR = path.dirname(__file__)
 
+command_options = {}
+cmdclass = {}
 
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+if BuildDoc is not None:
+    command_options['build_sphinx'] = {
+        'project': ('setup.py', NAME),
+        # 'author': ('setup.py', AUTHOR),
+        'version': ('setup.py', VERSION),
+        'release': ('setup.py', RELEASE),
+        'source_dir': ('setup.py', 'docs'),
+        'builder': ('setup.py', 'html')
+    }
+
+    cmdclass['build_sphinx'] = BuildDoc
+
+with open(path.join(BASE_DIR, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
 setup(
-    name='kant',
-    version='3.0.0',
+    name=NAME,
+    version=RELEASE,
     description='A CQRS and Event Sourcing framework for Python',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -56,4 +85,6 @@ setup(
     ],
     python_requires='~=3.5',
     keywords='eventsourcing cqrs eventstore',
+    cmdclass=cmdclass,
+    command_options=command_options,
 )

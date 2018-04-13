@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [3.0.0]
 ### Added
 - Add CHANGELOG
+- Initial configuration for sphinx
 
 ## [2.1.0] - 2018-02-16
 ### Added
