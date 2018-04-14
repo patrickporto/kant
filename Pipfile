@@ -5,7 +5,7 @@ name = "pypi"
 
 [dev-packages]
 
-"a14ec56" = {path = "/home/patrickporto/Projects/kant", editable = true}
+"a14ec56" = {path = ".", editable = true}
 sphinx = "*"
 "sphinx-autobuild" = "*"
 
