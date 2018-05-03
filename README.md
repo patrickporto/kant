@@ -1,4 +1,9 @@
 # Kant Framework
+
+**WARNING the release v3.0.0 will change the public API. Please wait!**
+
+> A CQRS and Event Sourcing framework, safe for humans.
+
 [![Build Status](https://travis-ci.org/patrickporto/kant.svg?branch=master)](https://travis-ci.org/patrickporto/kant)
 [![codecov.io](https://codecov.io/github/patrickporto/kant/coverage.svg?branch=master)](https://codecov.io/github/patrickporto/kant?branch=master)
 [![PyPI Package latest release](https://img.shields.io/pypi/v/kant.svg)](https://pypi.python.org/pypi/kant)
@@ -6,8 +11,6 @@
 [![Supported implementations](https://img.shields.io/pypi/implementation/kant.svg)](https://pypi.python.org/pypi/kant)
 [![Join the chat at https://gitter.im/kant-es/Lobby](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kant-es/Lobby)
 
-
-A CQRS and Event Sourcing framework, safe for humans.
 
 ## Feature Support
 
