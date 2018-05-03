@@ -149,32 +149,3 @@ class BooleanField(Field):
         if isinstance(value, str) and value.strip() == "false":
             return False
         return bool(value)
-
-
-class SchemaField(Field):
-
-    def __init__(self, to, *args, **kwargs):
-        self.to = to
-        super().__init__(*args, **kwargs)
-
-    def encode(self, value):
-        """
-        >>> account = AccountSchemaModel(balance=25.5)
-        >>> field = SchemaField(to=AccountSchemaModel)
-        >>> field.encode(account)
-        {'balance': 25.5}
-        """
-        return value.decode()
-
-    def parse(self, value):
-        """
-        >>> account = AccountSchemaModel(balance=25.5)
-        >>> field = SchemaField(to=AccountSchemaModel)
-        >>> field.parse(account)
-        <AccountSchemaModel: {'balance': Decimal('25.5')}>
-        >>> field.parse({"balance": 30 })
-        <AccountSchemaModel: {'balance': Decimal('30')}>
-        """
-        if isinstance(value, self.to):
-            return value
-        return self.to().make(value, cls=self.to)
