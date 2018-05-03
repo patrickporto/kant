@@ -11,3 +11,9 @@ publish:
 
 test:
 	python3 setup.py test
+
+docs-build:
+	python3 setup.py build_sphinx
+
+docs-live:
+	sphinx-autobuild docs _build/html

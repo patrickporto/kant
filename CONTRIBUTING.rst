@@ -30,7 +30,7 @@ You can preview the documentation:
 
 .. code-block:: console
 
-    $ sphinx-autobuild docs _build/html
+    $ make docs-live
 
 .. _official kant repository: https://github.com/patrickporto/kant
 .. _official bugtracker: https://github.com/patrickporto/kant/issues
