@@ -1,6 +1,7 @@
 import json
 from abc import ABCMeta
 from collections import MutableMapping
+from typing import Dict
 
 from .exceptions import FieldError
 from .fields import Field
@@ -24,7 +25,7 @@ class ModelMeta(ABCMeta):
 
 
 class FieldMapping(MutableMapping):
-    concrete_fields = {}
+    concrete_fields: Dict[str, Field] = {}
 
     def __init__(self, *args, **kwargs):
         self._values = {}
