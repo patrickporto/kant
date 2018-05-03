@@ -1,10 +1,11 @@
 """
-    kant
-    ~~~~~
-     A CQRS and Event Sourcing framework.
+kant
+~~~~~
 
-    :copyright: © 2018 by Patrick Porto.
-    :license: MIT, see LICENSE for more details.
+A CQRS and Event Sourcing framework.
+
+:copyright: © 2018 by Patrick Porto.
+:license: MIT, see LICENSE for more details.
 """
 import logging
 

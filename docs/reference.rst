@@ -4,8 +4,8 @@ API Reference
 =============
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
 
 .. automodule:: kant
-   :members:
+    :members:

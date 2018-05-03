@@ -1,4 +1,8 @@
-from abc import ABCMeta
+"""
+Test
+"""
+
+from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
 
@@ -6,8 +10,10 @@ from cuid import cuid
 from dateutil import parser as dateutil_parser
 
 
-class Field(metaclass=ABCMeta):
-
+class Field(ABC):
+    """
+    **Field** is an abastract class that represents a serializable field into the event store.
+    """
     def __init__(
         self, default=None, json_column=None, primary_key=False, *args, **kwargs
     ):
@@ -15,9 +21,11 @@ class Field(metaclass=ABCMeta):
         self.default = default
         self.json_column = json_column
 
+    @abstractmethod
     def encode(self, value):
         return value
 
+    @abstractmethod
     def parse(self, value):
         return value
 
