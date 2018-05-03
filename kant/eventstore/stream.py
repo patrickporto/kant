@@ -1,10 +1,6 @@
 import json
 from operator import attrgetter
 
-from kant.events import Event
-
-from .exceptions import DependencyDoesNotExist, StreamExists
-
 
 class EventStream:
 
@@ -70,4 +66,4 @@ class EventStream:
 
     @classmethod
     def make(self, obj):
-        return EventStream([Event.make(event) for event in obj])
+        return EventStream([event for event in obj])
