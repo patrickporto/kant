@@ -9,5 +9,7 @@ name = "pypi"
 sphinx = "*"
 "sphinx-autobuild" = "*"
 wheel = "*"
+tox = "*"
+detox = "*"
 
 [packages]

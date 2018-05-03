@@ -10,7 +10,7 @@ publish:
 	python3 setup.py sdist bdist_wheel upload
 
 test:
-	python3 setup.py test
+	detox
 
 docs-build:
 	python3 setup.py build_sphinx
