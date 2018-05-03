@@ -14,6 +14,7 @@ class Field(ABC):
     """
     **Field** is an abastract class that represents a serializable field into the event store.
     """
+
     def __init__(
         self, default=None, json_column=None, primary_key=False, *args, **kwargs
     ):

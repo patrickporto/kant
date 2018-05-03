@@ -10,8 +10,6 @@ from .exceptions import EventDoesNotExist, EventError
 class Event(FieldMapping, metaclass=ModelMeta):
     EVENT_JSON_COLUMN = "$type"
     version = IntegerField(default=0, json_column="$version")
-    __empty_stream__ = False
-    __dependencies__ = []
 
     @classmethod
     def make(self, obj):

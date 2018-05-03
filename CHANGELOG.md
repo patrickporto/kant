@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add CHANGELOG
 - Initial configuration for sphinx
 
+### Removed
+- Remove event dependencies
+
 ### Changed
 - Improves the contribute guide
 
