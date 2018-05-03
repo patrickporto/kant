@@ -1,6 +1,7 @@
-import pytest
-from kant.events import Event, DecimalField
+from kant.events import DecimalField, Event
 from kant.exceptions import EventDoesNotExist
+
+import pytest
 
 
 def test_event_should_encode_obj():

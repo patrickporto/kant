@@ -1,12 +1,14 @@
+import json
 from copy import deepcopy
 from operator import attrgetter
 from os import environ
-import json
-import pytest
-from kant.aggregates import Aggregate
-from kant.exceptions import StreamDoesNotExist, VersionError
-from kant.eventstore.stream import EventStream
+
 from kant import events
+from kant.aggregates import Aggregate
+from kant.eventstore.stream import EventStream
+from kant.exceptions import StreamDoesNotExist, VersionError
+
+import pytest
 
 
 class BankAccountCreated(events.Event):

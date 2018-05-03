@@ -1,8 +1,9 @@
 from copy import deepcopy
+
 from inflection import underscore
-from kant.eventstore.stream import EventStream
-from kant.datamapper.base import ModelMeta, FieldMapping
+from kant.datamapper.base import FieldMapping, ModelMeta
 from kant.datamapper.fields import *  # NOQA
+from kant.eventstore.stream import EventStream
 
 
 class ProjectionManager:

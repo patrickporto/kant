@@ -1,5 +1,6 @@
-import pytest
 from kant.eventstore.backends.aiopg import EventStoreConnection
+
+import pytest
 
 
 @pytest.mark.asyncio

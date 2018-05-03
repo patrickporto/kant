@@ -1,6 +1,7 @@
-import pytest
 from kant import aggregates, events
 from kant.eventstore import EventStream
+
+import pytest
 
 
 class BankAccountCreated(events.Event):

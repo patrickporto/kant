@@ -1,6 +1,5 @@
 from .backends.aiopg import EventStoreConnection
 
-
 _connection = None
 
 

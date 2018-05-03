@@ -1,9 +1,11 @@
 from os import environ
-from async_generator import yield_, async_generator
-from aiopg.sa import create_engine
+
 import aiopg
-import pytest
+from aiopg.sa import create_engine
+from async_generator import async_generator, yield_
 from kant.eventstore.connection import connect
+
+import pytest
 
 
 @pytest.fixture

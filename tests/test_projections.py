@@ -1,12 +1,14 @@
 from operator import attrgetter
-from sqlalchemy.schema import CreateTable, DropTable
-from async_generator import yield_, async_generator
+
 import sqlalchemy as sa
-import pytest
+from async_generator import async_generator, yield_
 from kant import aggregates, events, projections
 from kant.eventstore import EventStream
 from kant.projections import ProjectionError, ProjectionRouter
 from kant.projections.sa import SQLAlchemyProjectionAdapter
+from sqlalchemy.schema import CreateTable, DropTable
+
+import pytest
 
 
 class BankAccountCreated(events.Event):

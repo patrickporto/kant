@@ -1,9 +1,11 @@
 from collections import namedtuple
-from asyncio_extras.contextmanager import async_contextmanager
-from async_generator import yield_, async_generator
+
 import aiopg
+from async_generator import async_generator, yield_
+from asyncio_extras.contextmanager import async_contextmanager
 from kant.projections import ProjectionManager
-from ..exceptions import (StreamDoesNotExist, VersionError)
+
+from ..exceptions import StreamDoesNotExist, VersionError
 from ..stream import EventStream
 
 

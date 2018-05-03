@@ -1,9 +1,11 @@
 from copy import deepcopy
-from async_generator import yield_, async_generator
+
+from async_generator import async_generator, yield_
 from inflection import underscore
-from kant.datamapper.base import ModelMeta, FieldMapping
+from kant.datamapper.base import FieldMapping, ModelMeta
 from kant.datamapper.fields import *  # NOQA
 from kant.eventstore import EventStream, get_connection
+
 from .exceptions import AggregateError
 
 

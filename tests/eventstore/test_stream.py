@@ -1,7 +1,8 @@
-import pytest
-from kant.eventstore.stream import EventStream
-from kant.eventstore.exceptions import StreamExists, DependencyDoesNotExist
 from kant import events
+from kant.eventstore.exceptions import DependencyDoesNotExist, StreamExists
+from kant.eventstore.stream import EventStream
+
+import pytest
 
 
 class BankAccountCreated(events.Event):

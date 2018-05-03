@@ -1,5 +1,6 @@
 from sqlalchemy import and_, literal_column
-from .exceptions import ProjectionError, ProjectionDoesNotExist
+
+from .exceptions import ProjectionDoesNotExist, ProjectionError
 
 
 class SQLAlchemyProjectionAdapter:

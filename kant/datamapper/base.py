@@ -1,8 +1,9 @@
+import json
 from abc import ABCMeta
 from collections import MutableMapping
-import json
-from .fields import Field
+
 from .exceptions import FieldError
+from .fields import Field
 
 
 class ModelMeta(ABCMeta):

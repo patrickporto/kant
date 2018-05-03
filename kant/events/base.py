@@ -1,7 +1,9 @@
 from abc import ABCMeta
-from kant.datamapper.base import ModelMeta, FieldMapping
+
+from kant.datamapper.base import FieldMapping, ModelMeta
 from kant.datamapper.fields import *  # NOQA
 from kant.datamapper.models import *  # NOQA
+
 from .exceptions import EventDoesNotExist, EventError
 
 

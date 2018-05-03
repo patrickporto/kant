@@ -1,7 +1,9 @@
-from datetime import datetime
 import json
-import pytest
+from datetime import datetime
+
 from kant import events
+
+import pytest
 
 
 class FoundAdded(events.Event):

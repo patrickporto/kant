@@ -1,8 +1,9 @@
 from abc import ABCMeta
 from datetime import datetime
 from decimal import Decimal
-from dateutil import parser as dateutil_parser
+
 from cuid import cuid
+from dateutil import parser as dateutil_parser
 
 
 class Field(metaclass=ABCMeta):

@@ -1,4 +1,4 @@
-from .base import ModelMeta, FieldMapping
+from .base import FieldMapping, ModelMeta
 
 
 class SchemaModel(FieldMapping, metaclass=ModelMeta):
