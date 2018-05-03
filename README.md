@@ -64,9 +64,6 @@ from kant.eventstore import connect
 
 await connect(user='user', password='user', database='database')
 
-# create event store for bank_account
-conn.create_keyspace('bank_account')
-
 # create events
 bank_account_created = BankAccountCreated(
     id=123,

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - Remove event dependencies
 - Remove declarative events
+- Remove explicit create and drop stream 
 
 ### Changed
 - Improves the contribute guide

@@ -31,30 +31,6 @@ class EventStoreConnection:
     async def close(self):
         await self.pool.close()
 
-    async def create_keyspace(self, keyspace):
-        stmt = """
-        CREATE TABLE IF NOT EXISTS {keyspace} (
-            id varchar(255),
-            data jsonb NOT NULL,
-            created_at timestamp NOT NULL,
-            updated_at timestamp NOT NULL,
-            version bigserial NOT NULL
-        )
-        """.format(
-            keyspace=keyspace
-        )
-        async with self.pool.cursor() as cursor:
-            await cursor.execute(stmt)
-
-    async def drop_keyspace(self, keyspace):
-        stmt = """
-        DROP TABLE {keyspace}
-        """.format(
-            keyspace=keyspace
-        )
-        async with self.pool.cursor() as cursor:
-            await cursor.execute(stmt)
-
     @async_contextmanager
     async def open(self, keyspace):
         async with self.pool.cursor() as cursor:
