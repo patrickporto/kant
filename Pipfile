@@ -8,5 +8,6 @@ name = "pypi"
 "a14ec56" = {path = ".", editable = true}
 sphinx = "*"
 "sphinx-autobuild" = "*"
+wheel = "*"
 
 [packages]
