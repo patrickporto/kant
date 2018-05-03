@@ -4,6 +4,7 @@ from .exceptions import ProjectionDoesNotExist, ProjectionError
 
 
 class SQLAlchemyProjectionAdapter:
+
     def __init__(self, saconnection, router):
         self.saconnection = saconnection
         self.router = router
@@ -22,7 +23,8 @@ class SQLAlchemyProjectionAdapter:
             **projection.decode()
         ).where(
             and_(
-                literal_column(field) == value for field, value in projection.primary_keys().items()
+                literal_column(field) == value
+                for field, value in projection.primary_keys().items()
             )
         )
         await self.saconnection.execute(stmt)

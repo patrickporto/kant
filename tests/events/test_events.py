@@ -9,10 +9,7 @@ def test_event_should_encode_obj():
     class MyEvent(Event):
         amount = DecimalField()
 
-    serialized = {
-        '$type': 'MyEvent',
-        'amount': 20,
-    }
+    serialized = {"$type": "MyEvent", "amount": 20}
     # act
     my_event_model = Event.make(serialized)
     # assert
@@ -22,11 +19,7 @@ def test_event_should_encode_obj():
 
 def test_event_should_raise_when_encode_invalid_obj():
     # arrange
-    serialized = {
-        '$type': 'UtopicEvent',
-        '$version': 0,
-        'amount': 20,
-    }
+    serialized = {"$type": "UtopicEvent", "$version": 0, "amount": 20}
     # act and assert
     with pytest.raises(EventDoesNotExist):
         my_event_model = Event.make(serialized)

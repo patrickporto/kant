@@ -7,6 +7,7 @@ from .fields import Field
 
 
 class ModelMeta(ABCMeta):
+
     def __new__(mcs, class_name, bases, attrs):
         concrete_fields = {}
         new_attrs = {}
@@ -44,17 +45,15 @@ class FieldMapping(MutableMapping):
             try:
                 self._values[key] = self.concrete_fields[key].parse(value)
             except TypeError as e:
-                msg = ("The value '{value}' is invalid. "
-                       "The field '{key}' {exception}").format(
-                    value=repr(value),
-                    field=key,
-                    exception=str(e),
+                msg = (
+                    "The value '{value}' is invalid. " "The field '{key}' {exception}"
+                ).format(
+                    value=repr(value), field=key, exception=str(e)
                 )
                 raise TypeError(msg)
         else:
-            msg = '{class_name} does not support field: {field}'.format(
-                class_name=self.__class__.__name__,
-                field=key,
+            msg = "{class_name} does not support field: {field}".format(
+                class_name=self.__class__.__name__, field=key
             )
             raise KeyError(msg)
 
@@ -73,14 +72,16 @@ class FieldMapping(MutableMapping):
             if value is not None:
                 self._values[name] = self.concrete_fields[name].parse(value)
         except KeyError:
-            msg = "The field '{0}' is not defined in '{1}'.".format(name, self.__class__.__name__)
+            msg = "The field '{0}' is not defined in '{1}'.".format(
+                name, self.__class__.__name__
+            )
             raise FieldError(msg)
 
     def keys(self):
         return self._values.keys()
 
     def __repr__(self):
-        return '<{0}: {1}>'.format(self.__class__.__name__, self._values)
+        return "<{0}: {1}>".format(self.__class__.__name__, self._values)
 
     def copy(self):
         return self.__class__(self)

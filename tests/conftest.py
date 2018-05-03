@@ -12,11 +12,11 @@ import pytest
 @async_generator
 async def dbsession():
     conn = await aiopg.connect(
-        user=environ.get('DATABASE_USER'),
-        password=environ.get('DATABASE_PASSWORD'),
-        database=environ.get('DATABASE_DATABASE'),
-        host=environ.get('DATABASE_HOST', 'localhost'),
-        port=environ.get('DATABASE_PORT', 5432),
+        user=environ.get("DATABASE_USER"),
+        password=environ.get("DATABASE_PASSWORD"),
+        database=environ.get("DATABASE_DATABASE"),
+        host=environ.get("DATABASE_HOST", "localhost"),
+        port=environ.get("DATABASE_PORT", 5432),
     )
     await yield_(conn)
     conn.close()
@@ -26,11 +26,11 @@ async def dbsession():
 @async_generator
 async def saconnection():
     engine = await create_engine(
-        user=environ.get('DATABASE_USER'),
-        password=environ.get('DATABASE_PASSWORD'),
-        database=environ.get('DATABASE_DATABASE'),
-        host=environ.get('DATABASE_HOST', 'localhost'),
-        port=environ.get('DATABASE_PORT', 5432),
+        user=environ.get("DATABASE_USER"),
+        password=environ.get("DATABASE_PASSWORD"),
+        database=environ.get("DATABASE_DATABASE"),
+        host=environ.get("DATABASE_HOST", "localhost"),
+        port=environ.get("DATABASE_PORT", 5432),
     )
     async with engine.acquire() as conn:
         async with conn.begin() as transaction:
@@ -41,10 +41,8 @@ async def saconnection():
 @pytest.fixture
 @async_generator
 async def eventsourcing(dbsession):
-    eventstore = await connect(
-        pool=dbsession,
-    )
-    await eventstore.create_keyspace('event_store')
+    eventstore = await connect(pool=dbsession)
+    await eventstore.create_keyspace("event_store")
     await yield_(eventstore)
-    await eventstore.drop_keyspace('event_store')
+    await eventstore.drop_keyspace("event_store")
     await eventstore.close()

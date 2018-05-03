@@ -7,7 +7,10 @@ from dateutil import parser as dateutil_parser
 
 
 class Field(metaclass=ABCMeta):
-    def __init__(self, default=None, json_column=None, primary_key=False, *args, **kwargs):
+
+    def __init__(
+        self, default=None, json_column=None, primary_key=False, *args, **kwargs
+    ):
         self.primary_key = primary_key
         self.default = default
         self.json_column = json_column
@@ -25,6 +28,7 @@ class Field(metaclass=ABCMeta):
 
 
 class CUIDField(Field):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.primary_key:
@@ -38,6 +42,7 @@ class CUIDField(Field):
 
 
 class DecimalField(Field):
+
     def encode(self, value):
         return float(value)
 
@@ -46,6 +51,7 @@ class DecimalField(Field):
 
 
 class IntegerField(Field):
+
     def encode(self, value):
         return int(value)
 
@@ -54,6 +60,7 @@ class IntegerField(Field):
 
 
 class DateTimeField(Field):
+
     def __init__(self, auto_now=False, *args, **kwargs):
         self.auto_now = auto_now
         super().__init__(*args, **kwargs)
@@ -81,11 +88,12 @@ class DateTimeField(Field):
         if isinstance(value, str):
             return dateutil_parser.parse(value)
         if not isinstance(value, datetime):
-            raise TypeError('expected string or datetime object')
+            raise TypeError("expected string or datetime object")
         return value
 
 
 class CharField(Field):
+
     def encode(self, value):
         """
         >>> field = CharField()
@@ -104,6 +112,7 @@ class CharField(Field):
 
 
 class BooleanField(Field):
+
     def encode(self, value):
         """
         >>> field = BooleanField()
@@ -113,8 +122,8 @@ class BooleanField(Field):
         'false'
         """
         if value:
-            return 'true'
-        return 'false'
+            return "true"
+        return "false"
 
     def parse(self, value):
         """
@@ -128,12 +137,13 @@ class BooleanField(Field):
         >>> field.parse('false')
         False
         """
-        if isinstance(value, str) and value.strip() == 'false':
+        if isinstance(value, str) and value.strip() == "false":
             return False
         return bool(value)
 
 
 class SchemaField(Field):
+
     def __init__(self, to, *args, **kwargs):
         self.to = to
         super().__init__(*args, **kwargs)

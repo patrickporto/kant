@@ -21,7 +21,7 @@ class WithdrawalPerformed(events.Event):
 
 
 class OwnerChanged(events.Event):
-    __dependencies__ = ['BankAccountCreated']
+    __dependencies__ = ["BankAccountCreated"]
 
     new_owner = events.CharField()
 
@@ -30,8 +30,7 @@ class OwnerChanged(events.Event):
 async def test_eventstream_should_append_new_event():
     # arrange
     bank_account_created = BankAccountCreated(
-        id='052c21b6-aab9-4311-b954-518cd04f704c',
-        owner='John Doe'
+        id="052c21b6-aab9-4311-b954-518cd04f704c", owner="John Doe"
     )
     # act
     event_stream = EventStream()
@@ -46,8 +45,7 @@ async def test_eventstream_should_append_new_event():
 async def test_eventstream_should_append_new_event_only_once():
     # arrange
     bank_account_created = BankAccountCreated(
-        id='052c21b6-aab9-4311-b954-518cd04f704c',
-        owner='John Doe'
+        id="052c21b6-aab9-4311-b954-518cd04f704c", owner="John Doe"
     )
     # act
     event_stream = EventStream()
@@ -63,12 +61,10 @@ async def test_eventstream_should_append_new_event_only_once():
 async def test_eventstream_should_raise_stream_exists_when_stream_exists():
     # arrange
     bank_account_created_1 = BankAccountCreated(
-        id='052c21b6-aab9-4311-b954-518cd04f704c',
-        owner='John Doe'
+        id="052c21b6-aab9-4311-b954-518cd04f704c", owner="John Doe"
     )
     bank_account_created_2 = BankAccountCreated(
-        id='052c21b6-aab9-4311-b954-518cd04f704c',
-        owner='John Doe'
+        id="052c21b6-aab9-4311-b954-518cd04f704c", owner="John Doe"
     )
     # act
     event_stream = EventStream()
@@ -81,9 +77,7 @@ async def test_eventstream_should_raise_stream_exists_when_stream_exists():
 @pytest.mark.asyncio
 async def test_eventstream_should_raise_version_error_when_dependency_not_found():
     # arrange
-    owner_changed = OwnerChanged(
-        new_owner='Jane Doe',
-    )
+    owner_changed = OwnerChanged(new_owner="Jane Doe")
     # act and assert
     with pytest.raises(DependencyDoesNotExist) as e:
         event_stream = EventStream()

@@ -7,6 +7,7 @@ from .exceptions import DependencyDoesNotExist, StreamExists
 
 
 class EventStream:
+
     def __init__(self, events=None):
         self.initial_version = -1
         self.current_version = -1
@@ -43,7 +44,7 @@ class EventStream:
         return self
 
     def __iter__(self):
-        return iter(sorted(self._events, key=attrgetter('version')))
+        return iter(sorted(self._events, key=attrgetter("version")))
 
     def __repr__(self):
         return str(list(self))
@@ -54,7 +55,9 @@ class EventStream:
 
     def _valid_dependencies(self, event):
         event_names = [event.__class__.__name__ for event in self._events]
-        not_found = [event for event in event.__dependencies__ if event not in event_names]
+        not_found = [
+            event for event in event.__dependencies__ if event not in event_names
+        ]
         if len(not_found) > 0:
             raise DependencyDoesNotExist(event, not_found)
 

@@ -10,6 +10,7 @@ from .exceptions import AggregateError
 
 
 class Manager:
+
     def __init__(self, model, keyspace, using=None):
         self._model = model
         self.using = using
@@ -42,14 +43,16 @@ class Manager:
 
 
 class AggregateMeta(ModelMeta):
+
     def __new__(mcs, class_name, bases, attrs):
         cls = ModelMeta.__new__(mcs, class_name, bases, attrs)
-        if '__keyspace__' in attrs.keys():
-            cls.objects = Manager(model=cls, keyspace=attrs['__keyspace__'])
+        if "__keyspace__" in attrs.keys():
+            cls.objects = Manager(model=cls, keyspace=attrs["__keyspace__"])
         return cls
 
 
 class Aggregate(FieldMapping, metaclass=AggregateMeta):
+
     def __init__(self):
         super().__init__()
         self._all_events = EventStream()
@@ -80,7 +83,7 @@ class Aggregate(FieldMapping, metaclass=AggregateMeta):
 
     def apply(self, event):
         event_name = underscore(event.__class__.__name__)
-        method_name = 'apply_{0}'.format(event_name)
+        method_name = "apply_{0}".format(event_name)
         try:
             method = getattr(self, method_name)
             method(event)
@@ -114,7 +117,9 @@ class Aggregate(FieldMapping, metaclass=AggregateMeta):
         return self
 
     async def save(self):
-        return await self.objects.save(self.get_pk(), self.get_events(), self.notify_save)
+        return await self.objects.save(
+            self.get_pk(), self.get_events(), self.notify_save
+        )
 
     async def refresh_from_db(self):
         stream = await self.objects.get_stream(self.get_pk())

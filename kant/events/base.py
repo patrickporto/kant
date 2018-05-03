@@ -8,8 +8,8 @@ from .exceptions import EventDoesNotExist, EventError
 
 
 class Event(FieldMapping, metaclass=ModelMeta):
-    EVENT_JSON_COLUMN = '$type'
-    version = IntegerField(default=0, json_column='$version')
+    EVENT_JSON_COLUMN = "$type"
+    version = IntegerField(default=0, json_column="$version")
     __empty_stream__ = False
     __dependencies__ = []
 
@@ -19,7 +19,9 @@ class Event(FieldMapping, metaclass=ModelMeta):
             msg = "'{}' is not defined in {}".format(self.EVENT_JSON_COLUMN, obj)
             raise EventError(msg)
         event_name = obj[self.EVENT_JSON_COLUMN]
-        events = [Event for Event in self.__subclasses__() if Event.__name__ == event_name]
+        events = [
+            Event for Event in self.__subclasses__() if Event.__name__ == event_name
+        ]
         try:
             Event = events[0]
         except IndexError:
@@ -34,7 +36,5 @@ class Event(FieldMapping, metaclass=ModelMeta):
 
     def decode(self):
         event = {key: value for key, value in self.serializeditems()}
-        event.update({
-            self.EVENT_JSON_COLUMN: self.__class__.__name__,
-        })
+        event.update({self.EVENT_JSON_COLUMN: self.__class__.__name__})
         return event
