@@ -4,6 +4,7 @@
 [![PyPI Package latest release](https://img.shields.io/pypi/v/kant.svg)](https://pypi.python.org/pypi/kant)
 [![Supported versions](https://img.shields.io/pypi/pyversions/kant.svg)](https://pypi.python.org/pypi/kant)
 [![Supported implementations](https://img.shields.io/pypi/implementation/kant.svg)](https://pypi.python.org/pypi/kant)
+[![Join the chat at https://gitter.im/kant-es/Lobby](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kant-es/Lobby)
 
 
 A CQRS and Event Sourcing framework, safe for humans.
