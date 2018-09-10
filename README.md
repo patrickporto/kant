@@ -1,6 +1,6 @@
 # Kant Framework
 
-**WARNING the release v3.0.0 will change the public API. Please wait!**
+**WARNING: This repository is unmaintained**
 
 > A CQRS and Event Sourcing framework, safe for humans.
 
